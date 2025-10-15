@@ -190,6 +190,10 @@ SOCIALACCOUNT_ADAPTER = 'accounts.adapter.MySocialAccountAdapter'
 SOCIALACCOUNT_LOGIN_ON_GET = True
 LOGIN_REDIRECT_URL = 'sociallog'  # fallback only
 
+HARDCODED_USER = {
+    'username': 'testuser@gmail.com',
+    'password': '12345678',  
+}
 
 
 
