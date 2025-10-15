@@ -107,11 +107,24 @@ WSGI_APPLICATION = 'stayfinder.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.dummy',
+import os
+
+# Disable DB completely on Vercel (read-only FS)
+if os.environ.get('VERCEL') == '1':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.dummy',
+        }
     }
-}
+else:
+    # Use SQLite locally (development only)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
 
 
 
