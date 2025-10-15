@@ -1,0 +1,161 @@
+{% extends 'header.html' %}
+{% block header %}
+{% load static %}
+
+
+<style>
+    body {
+        background: #f2f7ff;
+    }
+
+    .center {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        max-width: 520px;
+    }
+
+    .pay-card {
+        animation: fadeInUp 1s;
+        border: none;
+        border-radius: 1rem;
+        background: white;
+        padding: 2rem;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .pay-card h4 {
+        font-weight: 600;
+        color: #28a745;
+    }
+
+    .list-group-item {
+        border: none;
+        padding-left: 0;
+        padding-right: 0;
+        font-size: 15px;
+    }
+
+    .btn-pay,
+    .btn-cancel {
+        border-radius: 30px;
+        padding: 12px 25px;
+        font-size: 16px;
+        transition: 0.3s ease-in-out;
+    }
+
+    .btn-pay:hover {
+        background-color: #218838;
+        transform: scale(1.03);
+    }
+
+    .btn-cancel:hover {
+        background-color: #c82333;
+        transform: scale(1.03);
+    }
+</style>
+
+<div class="center">
+    <div class="text-center pay-card animate__animated animate__fadeInUp">
+
+        <h4 class="mb-4">🔍 Review & Confirm</h4>
+        <ul class="list-group list-group-flush mb-4 text-start">
+            <li class="list-group-item"><strong>Rent:</strong> ₹{{ product.price }}</li>
+            <li class="list-group-item"><strong>Owner:</strong> {{ product.user.username }}</li>
+            <li class="list-group-item"><strong>You:</strong> {{ user.username }}</li>
+            <li class="list-group-item"><strong>Phone:</strong> {{ user.phone }}</li>
+            <li class="list-group-item"><strong>House Type:</strong> {{ product.house_type|title }}</li>
+            <li class="list-group-item"><strong>Transaction:</strong> {{ product.get_transaction_type_display }}</li>
+            <li class="list-group-item"><strong>Address:</strong> {{ user.address }}</li>
+        </ul>
+
+        <div class="d-flex justify-content-between">
+            <!-- Cancel Button -->
+            <a href="{% url 'book_product' product.id %}" class="btn btn-danger btn-cancel">Cancel</a>
+
+
+            <!-- Razorpay Button -->
+            <button id="rzp-button" class="btn btn-success btn-pay">Confirm Payment</button>
+        </div>
+    </div>
+</div>
+
+<!-- Razorpay Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+        "key": "{{ razorpay_key }}",
+        "amount": "{{ amount }}",
+        "currency": "INR",
+        "name": "Rental Payment",
+        "description": "Booking Confirmation",
+        "order_id": "{{ payment_id }}",
+        "handler": function (response) {
+            fetch("{% url 'payment_callback' booking.id %}", {
+             
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: new URLSearchParams({
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        window.location.href = "{% url 'success' booking.id %}";
+                    } else {
+                        alert("❌ Payment verification failed: " + data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error("Callback failed:", err);
+                });
+        },
+
+
+        // "handler": function (response) {
+        //     fetch(`/payment-callback/${bookingId}/`, {
+        //         method: "POST",
+        //         headers: {
+        //             "Content-Type": "application/x-www-form-urlencoded",
+        //             "X-CSRFToken": "{{ csrf_token }}"
+        //         },
+        //         body: new URLSearchParams({
+        //             razorpay_payment_id: response.razorpay_payment_id,
+        //             razorpay_order_id: response.razorpay_order_id,
+        //             razorpay_signature: response.razorpay_signature
+        //         })
+        //     })
+        //         .then(res => res.json())
+        //         .then(data => {
+        //             if (data.status.includes("success")) {
+        //                 window.location.href = `/success/${bookingId}/`;
+        //             } else {
+        //                 alert("Payment verification failed.");
+        //             }
+        //         });
+        // },
+
+        "prefill": {
+            "name": "{{ user.username }}",
+            "email": "{{ user.email }}"
+        },
+        "theme": {
+            "color": "#28a745"
+        }
+    };
+
+    var rzp = new Razorpay(options);
+    document.getElementById("rzp-button").onclick = function (e) {
+        rzp.open();
+        e.preventDefault();
+    };
+</script>
+{% endblock header%}

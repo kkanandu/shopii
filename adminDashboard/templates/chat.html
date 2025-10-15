@@ -1,0 +1,42 @@
+{% extends 'header.html' %}
+{% load humanize %}
+
+{% block header %}
+<div class="container my-4">
+  <h2 class="mb-4">All Chat Conversations</h2>
+
+  <table class="table table-bordered table-hover align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>Booking ID</th>
+        <th>Property</th>
+        <th>User</th>
+        <th>Owner</th>
+        <th>Owner Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for booking in bookings %}
+      <tr>
+        <td>{{ booking.id }}</td>
+        <td>{{ booking.product.title }}</td>
+        <td>{{ booking.user.username }}</td>
+        <td>{{ booking.product.user.username }}</td>
+        <td>{{ booking.product.user.get_category_display }}</td>
+        
+        <td>
+          <a class="btn btn-success btn-sm" href="{% url 'chat_room' receiver_id=booking.user.id %}">
+            View Chat
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="text-center">No chat messages found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

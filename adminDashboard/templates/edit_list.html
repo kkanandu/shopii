@@ -1,0 +1,130 @@
+{% extends 'header.html' %}
+{% load static %}
+{% block header %}
+
+<div class="container my-5">
+  <h2 class="mb-4">Edit Listing</h2>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="POST" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        {% for field in form %}
+        <div class="mb-3">
+          <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}
+          <div class="form-text">{{ field.help_text }}</div>
+          {% endif %}
+          {% if field.errors %}
+          <div class="text-danger small mt-1">
+            {{ field.errors|striptags }}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- Product Images -->
+        <h5 class="mt-4">Property Images</h5>
+        <small class="text-muted">You can upload a maximum of 5 images. Check “Delete” to replace existing ones.</small>
+        {{ formset.management_form }}
+
+        {% if formset.non_form_errors %}
+        <div class="alert alert-danger mt-2">
+          {{ formset.non_form_errors }}
+        </div>
+        {% endif %}
+
+        <button type="button" class="btn btn-sm btn-outline-danger my-2" onclick="
+          document.querySelectorAll('input[type=checkbox][name$=DELETE]').forEach(cb => cb.checked = true);
+        ">Select All for Deletion</button>
+
+        <div class="d-flex flex-wrap gap-3">
+          {% for image_form in formset %}
+          <div class="text-center border rounded p-2" style="width: 150px;">
+            {{ image_form.id }}
+
+            <div class="image-preview mb-2" style="height: 100px;">
+              {% if image_form.instance.image %}
+              <img src="{{ image_form.instance.image.url }}" alt="Image of {{ form.instance.title }}"
+                class="img-thumbnail mb-2" style="width: 100%; height: 100px; object-fit: cover;">
+              {% else %}
+              <div class="text-muted mb-2"
+                style="height: 100px; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center;">
+                No image
+              </div>
+              {% endif %}
+            </div>
+            <!-- Render only the input field (no filename) -->
+            {% with image_field=image_form.image %}
+            {{ image_field.as_widget }}
+            {% endwith %}
+
+            <label for="{{ image_form.image.id_for_label }}" class="btn btn-sm btn-outline-primary mt-1">
+              Change
+            </label>
+
+
+            {% if image_form.DELETE %}
+            <div class="form-check mt-2">
+              <input type="checkbox" class="form-check-input" id="{{ image_form.DELETE.id_for_label }}"
+                name="{{ image_form.DELETE.html_name }}">
+              <label class="form-check-label small" for="{{ image_form.DELETE.id_for_label }}">Delete</label>
+            </div>
+            {% endif %}
+
+            {% if image_form.errors %}
+            <div class="text-danger small mt-1">
+              {{ image_form.errors|striptags }}
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="mt-4">
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <a href="{% url 'dash' %}" class="btn btn-secondary ms-2">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  input[type="file"] {
+    display: none !important;
+  }
+</style>
+
+<script>
+  document.querySelectorAll('input[type="file"]').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const wrapper = input.closest('.text-center');
+      const previewDiv = wrapper.querySelector('.image-preview');
+      previewDiv.innerHTML = '';
+
+      if (input.files.length > 0) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+          const img = document.createElement('img');
+          img.src = ev.target.result;
+          img.classList.add('img-thumbnail', 'w-100', 'h-100');
+          img.style.objectFit = 'cover';
+          previewDiv.appendChild(img);
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+  });
+</script>
+
+{% endblock %}

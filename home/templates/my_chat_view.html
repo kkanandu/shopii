@@ -1,0 +1,48 @@
+{% extends 'header.html' %}
+{% load humanize %}
+
+{% block header %}
+<div class="container my-4">
+  <h2 class="mb-4">My Chat Conversations</h2>
+
+  <table class="table table-bordered table-hover align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>Property</th>
+        <th>Owner</th>
+        <th>Owner Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for booking in bookings %}
+      <tr>
+        <td>{{ booking.product.title }}</td>
+        <td>{{ booking.product.user.username }}</td>
+        <td>{{ booking.product.user.get_category_display }}</td>
+        <!-- <td>
+          {% if booking.last_msg_content %}
+            <div>
+              <small><strong>{{ booking.last_msg_sender }}:</strong>
+              {{ booking.last_msg_content|truncatechars:30 }}</small><br>
+              <small class="text-muted">{{ booking.last_msg_time|naturaltime }}</small>
+            </div>
+          {% else %}
+            <em>No messages</em>
+          {% endif %}
+        </td> -->
+        <td>
+          <a class="btn btn-primary btn-sm" href="{% url 'chat_room' receiver_id=booking.product.user.id %}">
+            Open Chat
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="text-center">You have no chat history.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

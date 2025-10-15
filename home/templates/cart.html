@@ -1,0 +1,469 @@
+{% extends 'header.html' %}
+{% load static %}
+
+{% block header %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<style>
+  .product-container {
+    display: flex;
+    gap: 2rem;
+    padding-top: 2rem;
+  }
+
+  /* .left-images {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  } */
+  .left-images {
+    position: sticky;
+    top: 80px;
+    /* adjust based on your navbar height */
+    align-self: flex-start;
+    width: 40%;
+  }
+
+
+  /* .thumbs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+  } */
+
+  .thumbs img {
+    width: 60px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    transition: border 0.2s;
+  }
+
+  .thumbs img:hover {
+    border-color: #2874f0;
+  }
+
+  .main-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #fff;
+  }
+
+  .right-details {
+    width: 60%;
+  }
+
+  .rating-stars .bi {
+    font-size: 1.5rem;
+    transition: color 0.2s, transform 0.2s;
+  }
+
+  .rating-stars button:hover .bi {
+    transform: scale(1.2);
+  }
+
+  .price {
+    color: #388e3c;
+    font-size: 1.8rem;
+    font-weight: bold;
+  }
+
+  .btn-buy {
+    background-color: #fb641b;
+    border: none;
+  }
+
+  .btn-buy:hover {
+    background-color: #d35400;
+  }
+
+  .btn-complain {
+    background-color: #2874f0;
+    border: none;
+  }
+
+  .btn-complain:hover {
+    background-color: #1a5dc0;
+  }
+
+  .desc-title {
+    font-weight: 600;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+  }
+
+  .badge {
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+  }
+
+  .bg-light {
+    background-color: #f9f9f9 !important;
+  }
+
+  .rating-stars label i {
+    cursor: pointer;
+  }
+
+  .bi-star-fill.text-warning {
+    color: #ffc107 !important;
+    /* Bootstrap warning yellow */
+  }
+</style>
+
+{% if messages %}
+{% for i in messages %}
+{% if i.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  {{ i }}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+{% endfor %}
+{% endif %}
+
+<div class="container">
+  <div class="product-container">
+    <!-- Left image section -->
+    <div class="left-images">
+      <img id="main-image" src="{{ product.product_image.url }}" class="main-image" alt="{{ product.title }}">
+      <div class="thumbs">
+        <img src="{{ product.product_image.url }}" alt="Thumb" class="thumb-img">
+        {% for img in images|slice:":5" %}
+        <img src="{{ img.image.url }}" alt="Thumbnail {{ forloop.counter }}" class="thumb-img" />
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right product details -->
+    <!-- <div class="right-details"> -->
+    <div class="right-details position-relative">
+      {% if product.booking_limit > 0 %}
+      <span
+        class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-warning text-dark px-3 py-2 mt-2 me-2 shadow-sm">
+        {{ product.booking_limit }} Slot{{ product.booking_limit|pluralize }}
+      </span>
+      {% else %}
+      <span
+        class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger text-white px-3 py-2 mt-2 me-2 shadow-sm">
+        Fully Booked
+      </span>
+      {% endif %}
+
+      <h3 class="fw-semibold mb-1">{{ product.title }}</h3>
+
+      <!-- <div class="mb-2 text-muted">
+        {{ product.category|title }}{% if product.category == 'house' and product.house_type %} - {{
+        product.house_type|title }}{% endif %}
+      </div> -->
+
+      <div class="price mb-2">₹ {{ product.price }}</div>
+
+      <div class="mb-2"><strong>📍 Location:</strong> {{ product.location }}</div>
+      <div class="mb-2"><strong>🕒 Posted:</strong> {{ product.posted_ago }}</div>
+
+      <!-- <div class="mb-2"><strong>Available Slots:</strong> {{ product.booking_limit }}</div> -->
+
+      <!-- ⭐ Star Display -->
+
+
+
+      <div class="desc-title">Description</div>
+      <p class="text-justify">{{ product.description }}</p>
+
+      <!-- Action buttons -->
+      {% if user.is_authenticated %}
+      <div class="d-flex gap-3 mt-4">
+        <a href="{% url 'book_product' product.id %}" class="btn btn-buy text-white px-4 py-2">Book Now</a>
+        <a href="{% url 'complaint_about_property' product.id %}"
+          class="btn btn-complain text-white px-4 py-2">Complaint</a>
+      </div>
+      {% else %}
+      <button class="btn btn-buy text-white mt-3 px-4 py-2" data-bs-toggle="modal" data-bs-target="#loginModal">
+        Book Now
+      </button>
+      {% endif %}
+      <div class="container mt-4">
+        <hr class="my-4">
+
+        <h5>User Reviews & Ratings</h5>
+
+        {% if user.is_authenticated %}
+        <form method="POST" action="">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="{{ review_form.rating.id_for_label }}">Rating</label><br>
+            <div class="rating-stars d-flex gap-1" id="rating-stars">
+              <input type="hidden" name="rating" id="rating-value" value="{{ review_form.rating.value|default:'0' }}">
+              {% for i in "12345" %}
+              <i class="bi bi-star text-muted" data-value="{{ forloop.counter }}"
+                style="font-size: 1.5rem; cursor: pointer;"></i>
+              {% endfor %}
+            </div>
+            {% if review_form.rating.errors %}
+            <div class="text-danger small">{{ review_form.rating.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            {{ review_form.text.label_tag }}
+            {{ review_form.text }}
+            {% if review_form.text.errors %}
+            <div class="text-danger small">{{ review_form.text.errors }}</div>
+            {% endif %}
+          </div>
+
+          <button type="submit" class="btn btn-primary">Submit Review</button>
+        </form>
+        {% else %}
+        <p class="text-muted">Please <a href="{% url 'log' %}">login</a> to submit a review.</p>
+        {% endif %}
+
+        <!-- Display existing reviews -->
+        <div class="mt-4">
+          {% if reviews %}
+          <div class="d-flex flex-column gap-3">
+            {% for review in reviews %}
+              <!-- Toggle button to collapse/expand entire review container -->
+              <button class="btn btn-link p-0 mb-2" type="button" data-bs-toggle="collapse"
+                data-bs-target="#review-collapse-{{ review.id }}" aria-expanded="false"
+                aria-controls="review-collapse-{{ review.id }}" id="toggle-review-{{ review.id }}">
+                Show Review
+              </button>
+          
+              <div class="collapse" id="review-collapse-{{ review.id }}">
+                <div class="border rounded p-3 shadow-sm bg-light mb-3">
+                  <div class="d-flex align-items-center mb-2">
+                    {% if review.user.profile_pic %}
+                    <img src="{{ review.user.profile_pic.url }}" alt="User" class="rounded-circle me-3" width="40" height="40">
+                    {% else %}
+                    <img src="{% static 'images/default-avatar.png' %}" alt="User" class="rounded-circle me-3" width="40" height="40">
+                    {% endif %}
+                    <div>
+                      <strong>{{ review.user.get_full_name }}</strong><br>
+                      <small class="text-muted">{{ review.posted_at|timesince }} ago</small>
+                    </div>
+                    <div class="ms-auto d-flex align-items-center gap-2">
+                      {% for i in "12345" %}
+                        {% if forloop.counter <= review.rating %}
+                          <i class="bi bi-star-fill text-warning"></i>
+                        {% else %}
+                          <i class="bi bi-star text-muted"></i>
+                        {% endif %}
+                      {% endfor %}
+          
+                      {% if review.sentiment == 'positive' %}
+                        <span class="badge bg-success mb-0">Positive</span>
+                      {% elif review.sentiment == 'negative' %}
+                        <span class="badge bg-danger mb-0">Negative</span>
+                      {% elif review.sentiment == 'neutral' %}
+                        <span class="badge bg-secondary mb-0">Neutral</span>
+                      {% endif %}
+                    </div>
+                  </div>
+          
+                  {% if user == review.user and editing_review_id|stringformat:"s" == review.id|stringformat:"s" %}
+                    <!-- Edit Review Inline -->
+                    <form method="POST" class="mt-3">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="edit">
+                      <input type="hidden" name="review_id" value="{{ review.id }}">
+          
+                      <div class="mb-2">
+                        <textarea name="text" class="form-control form-control-sm">{{ review.text }}</textarea>
+                      </div>
+          
+                      <div class="d-flex align-items-center gap-2">
+                        {% for i in "12345" %}
+                        <i class="bi bi-star{% if forloop.counter <= review.rating %}-fill{% endif %} text-warning"
+                          style="cursor:pointer;" onclick="setRating({{ review.id }}, {{ forloop.counter }})"
+                          onmouseover="hoverStars({{ review.id }}, {{ forloop.counter }})"
+                          onmouseout="resetStars({{ review.id }})" id="star-{{ review.id }}-{{ forloop.counter }}"></i>
+                        {% endfor %}
+                        <input type="hidden" name="rating" id="rating-input-{{ review.id }}" value="{{ review.rating }}">
+                      </div>
+          
+                      <button type="submit" class="btn btn-success btn-sm mt-2 me-2">Update</button>
+                      <a href="{% url 'detailview' product.pk %}" class="btn btn-secondary btn-sm mt-2">Cancel</a>
+                    </form>
+          
+                  {% else %}
+                  <p class="mb-2">{{ review.text }}</p>          
+                    {% if user == review.user %}
+                    <div class="d-flex gap-2 mt-2">
+                      <a href="{% url 'detailview' product.pk %}?edit={{ review.id }}" class="btn btn-outline-secondary btn-sm">Edit</a>
+          
+                      <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete this review?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="review_id" value="{{ review.id }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                      </form>
+                    </div>
+                    {% endif %}
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+          
+          {% else %}
+          <p class="text-muted">No reviews yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- START: Container for Product Detail -->
+
+
+
+  <!-- JS to toggle "Read More / Read Less" -->
+
+
+  <!-- User Reviews Section -->
+  <!-- User Reviews & Ratings Section -->
+
+  <!-- Login Modal -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title text-dark" id="loginModalLabel">Login Required</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          You need to <strong>log in</strong> to use the booking feature.
+        </div>
+        <div class="modal-footer">
+          <a href="{% url 'log' %}" class="btn btn-primary">Login Now</a>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('button[id^="toggle-review-"]').forEach(btn => {
+        const targetId = btn.getAttribute('data-bs-target');
+        const target = document.querySelector(targetId);
+  
+        if (!target) return;
+  
+        const collapseInstance = bootstrap.Collapse.getOrCreateInstance(target, { toggle: false });
+  
+        btn.addEventListener('click', function (e) {
+          // Toggle manually
+          if (target.classList.contains('show')) {
+            collapseInstance.hide();
+          } else {
+            collapseInstance.show();
+          }
+        });
+  
+        // Update button text based on collapse state
+        target.addEventListener('show.bs.collapse', () => {
+          btn.textContent = 'Hide Review';
+        });
+  
+        target.addEventListener('hide.bs.collapse', () => {
+          btn.textContent = 'Show Review';
+        });
+      });
+    });
+  </script>
+  
+    
+
+  <script>
+    // Image thumbnails click to change main image
+    document.querySelectorAll('.thumb-img').forEach(img => {
+      img.addEventListener('click', e => {
+        document.getElementById('main-image').src = e.target.src;
+      });
+    });
+
+    // Star rating input for new review form
+    const stars = document.querySelectorAll('#rating-stars i');
+    const ratingInput = document.getElementById('rating-value');
+
+    function updateStars(rating) {
+      stars.forEach((star, idx) => {
+        star.classList.toggle('bi-star-fill', idx < rating);
+        star.classList.toggle('bi-star', idx >= rating);
+        star.classList.toggle('text-warning', idx < rating);
+        star.classList.toggle('text-muted', idx >= rating);
+      });
+    }
+
+    stars.forEach(star => {
+      star.addEventListener('click', () => {
+        const val = parseInt(star.getAttribute('data-value'));
+        ratingInput.value = val;
+        updateStars(val);
+      });
+
+      star.addEventListener('mouseover', () => {
+        const val = parseInt(star.getAttribute('data-value'));
+        updateStars(val);
+      });
+
+      star.addEventListener('mouseout', () => {
+        const val = parseInt(ratingInput.value);
+        updateStars(val);
+      });
+    });
+
+    // Initialize stars with default or existing value
+    updateStars(parseInt(ratingInput.value) || 0);
+
+    // Inline edit star rating functions
+    function setRating(reviewId, rating) {
+      const input = document.getElementById(`rating-input-${reviewId}`);
+      input.value = rating;
+      resetStars(reviewId);
+    }
+
+    function hoverStars(reviewId, rating) {
+      for (let i = 1; i <= 5; i++) {
+        const star = document.getElementById(`star-${reviewId}-${i}`);
+        if (i <= rating) {
+          star.classList.add('bi-star-fill', 'text-warning');
+          star.classList.remove('bi-star', 'text-muted');
+        } else {
+          star.classList.remove('bi-star-fill', 'text-warning');
+          star.classList.add('bi-star', 'text-muted');
+        }
+      }
+    }
+
+    function resetStars(reviewId) {
+      const input = document.getElementById(`rating-input-${reviewId}`);
+      const rating = parseInt(input.value);
+      for (let i = 1; i <= 5; i++) {
+        const star = document.getElementById(`star-${reviewId}-${i}`);
+        if (i <= rating) {
+          star.classList.add('bi-star-fill', 'text-warning');
+          star.classList.remove('bi-star', 'text-muted');
+        } else {
+          star.classList.remove('bi-star-fill', 'text-warning');
+          star.classList.add('bi-star', 'text-muted');
+        }
+      }
+    }
+  </script>
+
+
+  {% endblock %}

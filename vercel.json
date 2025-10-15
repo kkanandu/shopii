@@ -1,0 +1,18 @@
+{
+    "builds":[
+        {
+            "src":"stayfinder/wsgi.py",
+            "use":"@vercel/python",
+            "config":{
+                "maxLambdaSize":"25mb",
+                "runtime":"python3.13"
+            }
+        }
+    ],
+    "routes":[
+        {
+            "src":"/(.*)",
+            "dest":"stayfinder/wsgi.py"
+        }
+    ]
+}

@@ -1,0 +1,242 @@
+{% extends 'header.html' %}
+{% block header %}
+{% load static %}
+<style>
+  /* .card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+} */
+</style>
+<div class="container-fluid p-0 mb-4">
+  <div class="position-relative">
+    <img src="{% static 'assets/banner.jpg' %}" alt="Wishlist Banner" class="img-fluid w-100"
+      style="max-height: 350px; object-fit: cover;">
+
+    <!-- Ad Content Over Banner -->
+    <div class="position-absolute top-50 start-50 translate-middle text-white text-center">
+      <h2 class="display-5 fw-bold shadow-sm">Streamline Your Rental Management</h2>
+      <p class="lead d-none d-md-block shadow-sm">Effortlessly manage your house and bike listings, track engagement,
+        and stay ahead.</p>
+    </div>
+  </div>
+</div>
+<div class="container">
+  {% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% for i in messages %}
+      {% with i.tags as bg_class %}
+      <div class="toast align-items-center text-white bg-{{ bg_class }} border-0" role="alert"
+      aria-live="assertive" aria-atomic="true" data-show="true">
+ 
+          <div class="d-flex">
+            <div class="toast-body">{{ i }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      {% endwith %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+  <h2 class="mb-4 text-center">Welcome {{ request.user.username }} 👋</h2>
+
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h5 class="card-title">Manage Listings</h5>
+          <p class="card-text">Add, edit, or delete house/bike listings.</p>
+          <a href="{% url 'product' %}" class="btn btn-primary ">Go to Listings</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h5 class="card-title">View Complaints</h5>
+          <p class="card-text">Check user complaints and respond to them.</p>
+          <a href="{% url 'complaints_about_owner_list' request.user.id %}" class="btn btn-danger">View Complaints</a>
+
+
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h5 class="card-title">Rental History</h5>
+          <p class="card-text">Review previous rental activity.</p>
+          <a href="{% url 'rental_history' %}" class="btn btn-success">Check History</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h5 class="card-title">Chat Section</h5>
+          <p class="card-text">View all user conversations.</p>
+          <a href="{% url 'admin_chat_bookings' %}" class="btn btn-info">View Messages</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h5 class="card-title">Booking Request</h5>
+          <p class="card-text">Approvals.</p>
+          <a href="" class="btn btn-warning" onclick="alert('This feature will be available soon'); return false;">View Request</a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if request.user.category == 'seller' %}
+  <div class="alert alert-info mt-5">
+    You are logged in as a <strong>Seller</strong>. You can manage your properties and interact with users.
+  </div>
+  {% elif request.user.category == 'renter' %}
+  <div class="alert alert-info mt-5">
+    You are logged in as a <strong>Renter</strong>. You can view and manage your rental requests.
+  </div>
+  {% endif %}
+</div>
+
+
+
+
+<section class="container my-5">
+  <h2 class="mb-4 text-center text-success">🏠 House Listings for Rent</h2>
+  <div class="row g-4">
+    {% for product in house_rent %}
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="product-card position-relative">
+          <img src="{{ product.product_image.url }}" class="card-img-top" style="height: 300px;" alt="{{ product.title }}">
+
+          <!-- Edit/Delete Icons -->
+          <div class="product-icons position-absolute top-0 end-0 m-2">
+            <a href="{% url 'edit_product' product.id %}" title="Edit">
+              <i class="fa-solid fa-pen-to-square" style="color: green;"></i>
+            </a>
+            <a href="{% url 'delete_product' product.id %}" title="Delete"
+              onclick="return confirm('Are you sure you want to delete this listing?')">
+              <i class="fa-solid fa-trash" style="color: red;"></i>
+            </a>
+          </div>
+        </div>
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ product.title }}</h5>
+          <p class="card-text text-truncate">{{ product.description }}</p>
+          <p class="fw-bold text-success">₹ {{ product.price }}</p>
+          <p class="text-muted small">{{ product.location }}</p>
+          <p class="text-muted small mt-auto">{{ product.posted_ago }}</p>
+          <a href="{% url 'detailview' product.id %}" class="btn btn-primary mt-2">View Details</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-center text-muted">No house rentals available.</p>
+    {% endfor %}
+  </div>
+</section>
+
+
+<section class="container my-5">
+  <h2 class="mb-4 text-center text-danger">🏠 House Listings for Sale</h2>
+  <div class="row g-4">
+    {% for product in house_sale %}
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="product-card position-relative">
+          <img src="{{ product.product_image.url }}" class="card-img-top" style="height: 300px;" alt="{{ product.title }}">
+          
+          <!-- Edit/Delete Icons -->
+          <div class="product-icons position-absolute top-0 end-0 m-2">
+            <a href="{% url 'edit_product' product.id %}" title="Edit">
+              <i class="fa-solid fa-pen-to-square" style="color: green;"></i>
+            </a>
+            <a href="{% url 'delete_product' product.id %}" title="Delete"
+              onclick="return confirm('Are you sure you want to delete this listing?')">
+              <i class="fa-solid fa-trash" style="color: red;"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ product.title }}</h5>
+          <p class="card-text text-truncate">{{ product.description }}</p>
+          <p class="fw-bold text-success">₹ {{ product.price }}</p>
+          <p class="text-muted small">{{ product.location }}</p>
+          <p class="text-muted small mt-auto">{{ product.posted_ago }}</p>
+          <a href="{% url 'detailview' product.id %}" class="btn btn-primary mt-2">View Details</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-center text-muted">No house sales available.</p>
+    {% endfor %}
+  </div>
+</section>
+
+
+<section class="container my-5">
+  <h2 class="mb-4 text-center text-info">🏍️ Bike Listings for Rent</h2>
+  <div class="row g-4">
+    {% for product in bike_rent %}
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="product-card position-relative">
+          <img src="{{ product.product_image.url }}" class="card-img-top" style="height: 300px;" alt="{{ product.title }}">
+
+          <!-- Edit/Delete Icons -->
+          <div class="product-icons position-absolute top-0 end-0 m-2">
+            <a href="{% url 'edit_product' product.id %}" title="Edit">
+              <i class="fa-solid fa-pen-to-square" style="color: green;"></i>
+            </a>
+            <a href="{% url 'delete_product' product.id %}" title="Delete"
+              onclick="return confirm('Are you sure you want to delete this listing?')">
+              <i class="fa-solid fa-trash" style="color: red;"></i>
+            </a>
+          </div>
+        </div>
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ product.title }}</h5>
+          <p class="card-text text-truncate">{{ product.description }}</p>
+          <p class="fw-bold text-success">₹ {{ product.price }}</p>
+          <p class="text-muted small">{{ product.location }}</p>
+          <p class="text-muted small mt-auto">{{ product.posted_ago }}</p>
+          <a href="{% url 'detailview' product.id %}" class="btn btn-primary mt-2">View Details</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-center text-muted">No bikes available for rent.</p>
+    {% endfor %}
+  </div>
+</section>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const toastElList = [].slice.call(document.querySelectorAll('.toast[data-show="true"]'));
+
+    toastElList.forEach(function (toastEl) {
+      const toast = new bootstrap.Toast(toastEl, {
+        autohide: false
+      });
+      toast.show();
+    });
+  });
+  </script>
+  
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+{% endblock header %}

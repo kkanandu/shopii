@@ -1,0 +1,291 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>StayFinder</title>
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Bootstrap CSS v5.2.1 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
+  <link rel="stylesheet" type="text/css"
+    href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
+  <link rel="stylesheet" href="{% static 'style/style.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg bg-light">
+    <div class="container">
+      <!-- LOGO -->
+      <a class="navbar-brand fw-bold me-4" href="{% url 'home' %}"><img src="{% static 'assets/pic.jpg' %}" alt="Logo"
+          style="height: 40px;">
+      </a>
+
+      <!-- NAVIGATION ITEMS -->
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Features</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Pricing</a>
+        </li>
+      </ul>
+
+      <!-- SEARCH FORM -->
+      <form class="d-flex me-3" method="GET" action="{% url 'search_results' %}">
+        <input class="form-control me-2" type="search" name="query" placeholder="Search by location..."
+          aria-label="Search" required>
+        <select class="form-select me-2" name="search_type" required>
+          <option value="feature">Feature (Houses)</option>
+          <option value="pricing">Pricing (Bikes)</option>
+        </select>
+        <button class="btn btn-outline-dark" type="submit">Search</button>
+      </form>
+
+      <!-- RIGHT MENU -->
+      <ul class="navbar-nav">
+        {% if request.user.is_authenticated and not request.user.is_superuser %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'profile' %}">Profile</a>
+        </li>
+        <!-- <li class="nav-item">
+          <a class="nav-link" href="#">Cart</a>
+        </li> -->
+        <!-- Notification bell opens modal -->
+        <li class="nav-item">
+          <a href="#" class="nav-link position-relative" id="notificationBell" aria-expanded="false">
+            🔔 Notifications
+            {% if user_notifications.count > 0 %}
+            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle p-1 rounded-circle">
+              {{ user_notifications.count }}
+            </span>
+            {% endif %}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">My cart</a>
+        </li>
+        <!-- <li class="nav-item d-flex align-items-center">
+          <a class="nav-link" id="wishlistLink" href="{% url 'wishlist_list' %}">Wishlist</a>
+          <span class="text-dark">|</span>
+          <a class="nav-link" href="{% url 'my_bookings' %}">My Bookings</a>
+        </li> -->
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+        </li>
+        {% else %}
+        <!-- Guest user (not logged in) -->
+        <li class="nav-item d-flex align-items-center">
+          <a class="nav-link px-1 active" href="{% url 'reg' %}">Register</a>
+          <span class="text-dark">/</span>
+          <a class="nav-link px-1 active" href="{% url 'log' %}">Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">My cart</a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+  <!-- Toast container -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <!-- Delete Toast -->
+    <div id="deleteToast" class="toast bg-success text-white" role="alert" data-bs-delay="2000">
+      <div class="d-flex">
+        <div class="toast-body">Notification deleted successfully</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+          aria-label="Close"></button>
+      </div>
+    </div>
+    <!-- Empty Toast -->
+    <div id="emptyToast" class="toast bg-warning text-dark" role="alert" data-bs-delay="3000">
+      <div class="d-flex">
+        <div class="toast-body">No notifications to display</div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+  <div class="toast-container position-fixed top-10 end-0 p-3" style="z-index: 1055;">
+    {% if not wishlist_items %}
+    <!-- Empty Wishlist Toast -->
+    <div id="emptyWishlistToast" class="toast bg-warning text-dark" role="alert" aria-live="assertive"
+      aria-atomic="true" data-bs-delay="3000">
+      <div class="d-flex">
+        <div class="toast-body">Your wishlist is empty.</div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  <!-- Notification Modal -->
+  <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content rounded-3 shadow animate__animated animate__slideInRight">
+        <div class="modal-header">
+          <h5 class="modal-title" id="notificationModalLabel">Notifications</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {% if user_notifications %}
+          <ul class="list-group" id="notificationList" data-delete-url="{% url 'notification_delete' 0 %}">
+            {% for note in user_notifications %}
+            <li class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ note.id }}">
+              <div>{{ note.message }}</div>
+              <button class="btn btn-sm btn-outline-danger delete-notification-btn" data-id="{{ note.id }}">
+                <i class="fas fa-trash"></i>
+              </button>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="text-muted">No new notifications</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    // Wrap everything in a function to avoid conflicts
+    (function () {
+      'use strict';
+
+      // Wait for DOM to be ready
+      document.addEventListener('DOMContentLoaded', function () {
+        try {
+          // Initialize wishlist functionality only if elements exist
+          initializeWishlist();
+
+          // Initialize notifications only if elements exist
+          initializeNotifications();
+
+        } catch (error) {
+          console.error('Error initializing header scripts:', error);
+        }
+      });
+      function initializeWishlist() {
+        const wishlistLink = document.getElementById('wishlistLink');
+        const emptyWishlistToastEl = document.getElementById('emptyWishlistToast');
+
+        // Only proceed if both elements exist
+        if (!wishlistLink || !emptyWishlistToastEl) {
+          return; // Exit gracefully if elements don't exist
+        }
+        const isWishlistEmpty = "{{ wishlist_items|yesno:'false,true' }}" === "true";
+        const emptyWishlistToast = new bootstrap.Toast(emptyWishlistToastEl);
+        wishlistLink.addEventListener('click', function (event) {
+          if (isWishlistEmpty) {
+            event.preventDefault();
+            emptyWishlistToast.show();
+          }
+        });
+      }
+      function initializeNotifications() {
+        const notificationList = document.getElementById('notificationList');
+        const deleteToastEl = document.getElementById('deleteToast');
+        const emptyToastEl = document.getElementById('emptyToast');
+        const bell = document.getElementById('notificationBell');
+        const modalEl = document.getElementById('notificationModal');
+        // Only proceed if essential elements exist
+        if (!bell || !modalEl || !deleteToastEl || !emptyToastEl) {
+          return; // Exit gracefully if essential elements don't exist
+        }
+        const deleteToast = new bootstrap.Toast(deleteToastEl);
+        const emptyToast = new bootstrap.Toast(emptyToastEl);
+        const bootstrapModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        // Function to get CSRF token cookie for POST requests
+        function getCookie(name) {
+          let cookieValue = null;
+          if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+              }
+            }
+          }
+          return cookieValue;
+        }
+        // DELETE NOTIFICATION ACTION
+        if (notificationList) {
+          notificationList.addEventListener("click", function (e) {
+            const deleteBtn = e.target.closest('.delete-notification-btn');
+            if (deleteBtn) {
+              e.preventDefault();
+              const notificationId = deleteBtn.dataset.id;
+              const url = `/home/notification/${notificationId}/delete/`;
+              const csrftoken = getCookie('csrftoken');
+              const listItem = deleteBtn.closest('li');
+              fetch(url, {
+                method: 'POST',
+                headers: {
+                  'X-CSRFToken': csrftoken,
+                  'Accept': 'application/json',
+                },
+              })
+                .then(res => {
+                  if (res.ok) {
+                    listItem.remove();
+                    deleteToast.show();
+                    const badge = document.querySelector('#notificationBell .badge');
+                    if (badge) {
+                      let count = parseInt(badge.textContent) || 0;
+                      count = count - 1;
+                      if (count <= 0) {
+                        badge.remove();
+                      } else {
+                        badge.textContent = count;
+                      }
+                    }
+                    // If no notifications left, replace list with message & close modal
+                    if (notificationList.children.length === 0) {
+                      notificationList.outerHTML = '<p class="text-muted">No new notifications</p>';
+                      bootstrapModal.hide();
+                    }
+                  }
+                })
+                .catch(error => {
+                  console.error("Fetch error:", error);
+                });
+            }
+          });
+        }
+        // NOTIFICATION BELL CLICK HANDLER
+        bell.addEventListener('click', function (e) {
+          const list = document.getElementById('notificationList');
+          if (!list || list.children.length === 0) {
+            e.preventDefault();
+            e.stopPropagation();
+            emptyToast.show();
+            bootstrapModal.hide();
+          } else {
+            bootstrapModal.show();
+          }
+        });
+      }
+    })();
+  </script>
+  {% block header %}
+  {% endblock header %}
+  {% block content %}
+  {% endblock content %}
+  {% block extra_css %}
+  {% endblock extra_css %}
+</body>
+
+</html>

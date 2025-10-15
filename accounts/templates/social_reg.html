@@ -1,0 +1,819 @@
+<!-- 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+
+
+{% load static %}
+{% load widget_tweaks %}
+{% if messages %}
+{% for i in messages %}
+{% if i.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ i }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+{% endfor %}
+{% endif %}
+
+<div class="container my-5">
+  <div class="card shadow-sm mx-auto" style="max-width: 800px;">
+    <div class="card-body">
+      <h3 class="mb-4">Complete Your Profile</h3>
+
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <div class="row g-4">
+          <div class="col-md-4 text-center">
+            <img id="profile-preview"
+                 src="{% if user.profile_pic %}{{ user.profile_pic.url }}{% else %}{% static 'default_avatar.png' %}{% endif %}"
+                 alt="Profile Preview"
+                 class="img-thumbnail rounded-circle shadow-sm"
+                 style="width: 160px; height: 160px; object-fit: cover; border: 3px solid #0d6efd;">
+
+            <input type="file" name="profile_pic" id="id_profile_pic" accept="image/*" class="d-none" onchange="previewProfileImage(this)">
+            <label for="id_profile_pic" class="btn btn-outline-primary btn-sm mt-2">
+              Change Profile Image
+            </label>
+          </div>
+
+          <div class="col-md-8">
+            {% for field in form %}
+              {% if field.name == "profile_pic" %}
+                {# Already handled above #}
+              {% elif field.name in "username email" %}
+                <div class="mb-3">
+                  <label class="form-label">{{ field.label }}</label>
+                  {{ field|add_class:"form-control" }}
+                  {% if field.errors %}
+                    <div class="text-danger small">{{ field.errors }}</div>
+                  {% endif %}
+                </div>
+              {% else %}
+                <div class="mb-3">
+                  <label class="form-label">{{ field.label }}</label>
+                  {{ field|add_class:"form-control" }}
+                  {% if field.errors %}
+                    <div class="text-danger small">{{ field.errors }}</div>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="mt-4 text-end">
+          <button type="submit" class="btn btn-primary btn-lg">Save and Continue</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function previewProfileImage(input) {
+    const preview = document.getElementById('profile-preview');
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        preview.src = e.target.result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>
+ -->
+ 
+
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5649c0;
+            --secondary: #fd79a8;
+            --accent: #00cec9;
+            --dark: #2d3436;
+            --light: #f7f7f7;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --gradient-dark: linear-gradient(135deg, var(--primary-dark) 0%, #e84393 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            /* background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab); */
+            /* background-size: 400% 400%; */
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .profile-card {
+            width: 100%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: cardEntrance 1s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+        
+        @keyframes cardEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .card-header {
+            background: var(--gradient);
+            padding: 40px 40px 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            z-index: 0;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        
+        .profile-image-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+        
+        .profile-image:hover {
+            transform: scale(1.1) rotate(5deg);
+            border-color: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .image-upload-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--secondary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 3px solid white;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
+        
+        .image-upload-btn:hover {
+            transform: scale(1.2) rotate(15deg);
+            background: #ff4d8d;
+        }
+        
+        .card-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .card-body {
+            padding: 40px;
+        }
+        
+        .progress-container {
+            margin-bottom: 30px;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .progress {
+            height: 12px;
+            border-radius: 10px;
+            background: #e9ecef;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 10px;
+            transition: width 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+        
+        .form-group {
+            position: relative;
+            margin-bottom: 0;
+            animation: formFieldEntrance 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        
+        /* Make bio and category fields span two columns */
+        .form-group.bio-field,
+        .form-group.category-field {
+            grid-column: 1 / -1;
+        }
+        
+        @keyframes formFieldEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-label i {
+            margin-right: 10px;
+            color: var(--primary);
+            width: 20px;
+            text-align: center;
+        }
+        
+        .input-container {
+            position: relative;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .field-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus + .field-icon {
+            color: var(--primary);
+            transform: translateY(-50%) scale(1.2);
+        }
+        
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(108, 92, 231, 0.4);
+            background: var(--gradient-dark);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .submit-btn:hover::after {
+            left: 100%;
+        }
+        
+        .floating-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-1000%) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .alert-success {
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            padding: 15px 20px;
+        }
+        
+        .alert-success .btn-close {
+            filter: invert(1);
+        }
+        
+        .text-danger {
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .form-group.bio-field,
+            .form-group.category-field {
+                grid-column: 1;
+            }
+            
+            .card-header {
+                padding: 30px 20px 20px;
+            }
+            
+            .card-body {
+                padding: 30px 20px;
+            }
+            
+            .card-title {
+                font-size: 1.8rem;
+            }
+            
+            .profile-image {
+                width: 120px;
+                height: 120px;
+            }
+        }
+        
+        /* Animation delays for form groups */
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .form-group:nth-child(5) { animation-delay: 0.5s; }
+        .form-group:nth-child(6) { animation-delay: 0.6s; }
+        .form-group:nth-child(7) { animation-delay: 0.7s; }
+    </style>
+</head>
+<body>
+    <!-- Success Message -->
+    <div class="container">
+        {% if messages %}
+        {% for i in messages %}
+        {% if i.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+        <div class="alert alert-success alert-dismissible fade show animate__animated animate__bounceInDown" role="alert" id="successAlert">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle me-2"></i>
+                <div>{{ i }}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        <div class=" d-flex justify-content-center">
+        <div class="profile-card">
+            <!-- Floating Particles -->
+            <div class="floating-particles" id="particles-container"></div>
+            
+            <!-- Header Section -->
+            <div class="card-header">
+                <div class="header-content">
+                    <div class="profile-image-container">
+                        <img id="profile-preview"
+                             src="{% if user.profile_pic %}{{ user.profile_pic.url }}{% else %}https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80{% endif %}"
+                             alt="Profile Preview"
+                             class="profile-image">
+                        <div class="image-upload-btn" onclick="document.getElementById('id_profile_pic').click()">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    <h1 class="card-title">Complete Your Profile</h1>
+                    <p class="card-subtitle">Fill in your details to unlock all features</p>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="card-body">
+                <div class="progress-container">
+                    <div class="progress-text">
+                        <span>Profile Completion</span>
+                        <span id="completion-percentage">25%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                
+                <!-- Form Section -->
+                <form method="post" enctype="multipart/form-data" novalidate id="profile-form">
+                    {% csrf_token %}
+                    
+                    <!-- Hidden file input -->
+                    <input type="file" name="profile_pic" id="id_profile_pic" accept="image/*" class="d-none" onchange="previewProfileImage(this)">
+                    
+                    <div class="form-grid">
+                        <!-- First row: username and name -->
+                        {% for field in form %}
+                            {% if field.name == "username" or field.name == "name" %}
+                                <div class="form-group">
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {% if field.name == "username" %}
+                                            <i class="fas fa-at"></i>
+                                        {% else %}
+                                            <i class="fas fa-user"></i>
+                                        {% endif %}
+                                        {{ field.label }}
+                                    </label>
+                                    <div class="input-container">
+                                        {{ field|add_class:"form-control" }}
+                                        <i class="fas 
+                                            {% if field.name == "username" %}
+                                                fa-check
+                                            {% else %}
+                                                fa-user
+                                            {% endif %}
+                                        field-icon"></i>
+                                    </div>
+                                    {% if field.errors %}
+                                        <div class="text-danger small">{{ field.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Second row: phone and email -->
+                        {% for field in form %}
+                            {% if field.name == "phone" or field.name == "email" %}
+                                <div class="form-group">
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {% if field.name == "phone" %}
+                                            <i class="fas fa-phone"></i>
+                                        {% else %}
+                                            <i class="fas fa-envelope"></i>
+                                        {% endif %}
+                                        {{ field.label }}
+                                    </label>
+                                    <div class="input-container">
+                                        {{ field|add_class:"form-control" }}
+                                        <i class="fas 
+                                            {% if field.name == "phone" %}
+                                                fa-mobile-alt
+                                            {% else %}
+                                                fa-envelope
+                                            {% endif %}
+                                        field-icon"></i>
+                                    </div>
+                                    {% if field.errors %}
+                                        <div class="text-danger small">{{ field.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        {% for field in form %}
+                            {% if field.name == "category" %}
+                                <div class="form-group category-field">
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        <i class="fas fa-tag"></i>
+                                        {{ field.label }}
+                                    </label>
+                                    <div class="input-container">
+                                        {{ field|add_class:"form-control" }}
+                                        <i class="fas fa-tag field-icon"></i>
+                                    </div>
+                                    {% if field.errors %}
+                                        <div class="text-danger small">{{ field.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        {% for field in form %}
+                            {% if field.name == "address" or field.name == "bio" %}
+                                <div class="form-group {% if field.name == 'bio' %}{% endif %}">
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {% if field.name == "address" %}
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        {% else %}
+                                            <i class="fas fa-edit"></i>
+                                        {% endif %}
+                                        {{ field.label }}
+                                    </label>
+                                    <div class="input-container">
+                                        {{ field|add_class:"form-control" }}
+                                        <i class="fas 
+                                            {% if field.name == "address" %}
+                                                fa-map-marker-alt
+                                            {% else %}
+                                                fa-pencil-alt
+                                            {% endif %}
+                                        field-icon"></i>
+                                    </div>
+                                    {% if field.errors %}
+                                        <div class="text-danger small">{{ field.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Fourth row: category (full width) -->
+                        
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-save me-2"></i> Save and Continue
+                    </button>
+                </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            const particleCount = 15;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random size between 5 and 15px
+                const size = Math.random() * 10 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Random position
+                particle.style.left = `${Math.random() * 100}%`;
+                
+                // Random animation delay and duration
+                const delay = Math.random() * 15;
+                const duration = Math.random() * 10 + 15;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.animationDuration = `${duration}s`;
+                
+                container.appendChild(particle);
+            }
+        }
+        
+        // Profile image preview
+        function previewProfileImage(input) {
+            const preview = document.getElementById('profile-preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.classList.add('animate__animated', 'animate__pulse');
+                    setTimeout(() => {
+                        preview.classList.remove('animate__animated', 'animate__pulse');
+                    }, 500);
+                    
+                    // Update progress bar when image is added
+                    updateProgressBar();
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // Update progress bar based on form completion
+        function updateProgressBar() {
+            const form = document.getElementById('profile-form');
+            const inputs = form.querySelectorAll('input, textarea, select');
+            let filledCount = 0;
+            
+            inputs.forEach(input => {
+                if (input.type !== 'file' && input.value.trim() !== '') {
+                    filledCount++;
+                }
+            });
+            
+            // Check if profile image is set
+            const profilePreview = document.getElementById('profile-preview');
+            if (profilePreview.src.includes('base64') || !profilePreview.src.includes('unsplash')) {
+                filledCount++;
+            }
+            
+            const percentage = Math.min(Math.round((filledCount / (inputs.length + 1)) * 100), 100);
+            document.querySelector('.progress-bar').style.width = percentage + '%';
+            document.getElementById('completion-percentage').textContent = percentage + '%';
+            
+            // Animate progress bar update
+            document.querySelector('.progress-bar').classList.add('animate__animated', 'animate__pulse');
+            setTimeout(() => {
+                document.querySelector('.progress-bar').classList.remove('animate__animated', 'animate__pulse');
+            }, 500);
+        }
+        
+        // Form submission simulation
+        document.getElementById('profile-form').addEventListener('submit', function(e) {
+            // Show success message if not already shown by Django
+            if (!document.getElementById('successAlert')) {
+                
+                // Create success alert
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show animate__animated animate__bounceInDown';
+                alertDiv.id = 'successAlert';
+                alertDiv.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <div>Profile updated successfully!</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.profile-card'));
+                
+                // Simulate API call
+                setTimeout(() => {
+                    alertDiv.classList.remove('animate__bounceInDown');
+                    alertDiv.classList.add('animate__fadeOutUp');
+                    
+                    setTimeout(() => {
+                        alertDiv.style.display = 'none';
+                        alertDiv.classList.remove('animate__fadeOutUp');
+                    }, 1000);
+                }, 3000);
+            }
+        });
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            updateProgressBar();
+            
+            const formInputs = document.querySelectorAll('#profile-form input, #profile-form textarea, #profile-form select');
+            formInputs.forEach(input => {
+                input.addEventListener('input', updateProgressBar);
+                input.addEventListener('change', updateProgressBar);
+                
+                // Add focus effects
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focused');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

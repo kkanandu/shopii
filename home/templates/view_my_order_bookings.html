@@ -1,0 +1,48 @@
+{% extends "header.html" %}
+{% load humanize %}
+
+{% block header %}
+<div class="container mt-5 animate__animated animate__fadeIn">
+    <h2 class="mb-4 text-center text-success">📦 My Bookings</h2>
+
+    {% if bookings %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for booking in bookings %}
+        <div class="col">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">{{ booking.product.title }}</h5>
+                    <p class="card-text">
+                        <strong>Type:</strong> {{ booking.product.house_type|title }}<br>
+                        <strong>Price:</strong> ₹{{ booking.product.price|intcomma }}<br>
+                        <strong>Status:</strong>
+                        <span class="badge bg-{{ booking.is_paid|yesno:'success,warning' }}">
+                            {{ booking.is_paid|yesno:'Paid,Pending' }}
+                        </span><br>
+                        <strong>Booked:</strong> {{ booking.reserved_at|naturaltime }}
+                    </p>
+
+                    {% if booking.is_paid %}
+                    <!-- <p class="text-success">Debug: booking ID = {{ booking.id }}</p> -->
+                    <a href="{% url 'success' booking.id %}" class="btn btn-outline-primary btn-sm">
+                        View Details
+                    </a>
+                    {% else %}
+                    <a href="#" class="btn btn-outline-warning btn-sm"
+                        onclick="alert('❗ Payment not completed. Please finish the payment to view full details.')">
+                        View Details
+                    </a>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center">
+        You have no bookings yet. Start exploring and book your next stay!
+    </div>
+    {% endif %}
+</div>
+{% endblock header %}

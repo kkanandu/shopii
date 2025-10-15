@@ -1,0 +1,1241 @@
+{% extends 'header.html' %}
+{% load static widget_tweaks %}
+{% load humanize %}
+{% block header %}
+<!-- AOS CSS -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+  /* Modern E-commerce Design System */
+  :root {
+    --primary: #2874f0;
+    --primary-light: #4a90e2;
+    --primary-dark: #1c60d1;
+    --secondary: #ff6161;
+    --accent: #00b894;
+    --warning: #ffa502;
+    --success: #00b894;
+    --dark: #172337;
+    --light: #f5f5f5;
+    --gray: #878787;
+    --border: #e0e0e0;
+    --card-bg: #ffffff;
+    --shadow-sm: 0 2px 15px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 15px 50px rgba(0, 0, 0, 0.15);
+    --gradient-primary: linear-gradient(135deg, #2874f0, #4a90e2);
+    --gradient-accent: linear-gradient(135deg, #00b894, #00a085);
+    --gradient-warning: linear-gradient(135deg, #ffa502, #ff7f50);
+    --gradient-danger: linear-gradient(135deg, #ff6161, #ff4757);
+  }
+
+  body {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Floating Animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .floating {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Pulse Animation */
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .pulse-animation {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  /* Slide In Animation */
+  @keyframes slideIn {
+    from { transform: translateX(-100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  .slide-in {
+    animation: slideIn 0.6s ease-out;
+  }
+
+  /* Main Layout */
+  .dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  /* Sidebar Navigation */
+  .modern-sidebar {
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    padding: 2rem 0;
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+    transition: all 0.3s ease;
+  }
+
+  .modern-sidebar:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-5px);
+  }
+
+  .nav-section {
+    margin-bottom: 2rem;
+  }
+
+  .nav-section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0 2rem 1rem;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 1rem;
+  }
+
+  .modern-nav-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 2rem;
+    color: var(--dark);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .modern-nav-item::before {
+    content: '';
+    position: absolute;
+    left: -100%;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-primary);
+    opacity: 0.05;
+    transition: left 0.4s ease;
+  }
+
+  .modern-nav-item:hover::before,
+  .modern-nav-item.active::before {
+    left: 0;
+  }
+
+  .modern-nav-item:hover,
+  .modern-nav-item.active {
+    color: var(--primary);
+    border-left-color: var(--primary);
+    background: rgba(40, 116, 240, 0.02);
+  }
+
+  .modern-nav-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--light);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .modern-nav-item:hover .modern-nav-icon,
+  .modern-nav-item.active .modern-nav-icon {
+    background: var(--gradient-primary);
+    color: white;
+    transform: scale(1.1);
+  }
+
+  /* Main Content Area */
+  .modern-main {
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .modern-main:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Profile Hero Section */
+  .profile-hero {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 3rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .profile-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    animation: float 8s ease-in-out infinite reverse;
+  }
+
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    object-fit: cover;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+  }
+
+  .profile-avatar:hover {
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+
+  .profile-badge {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* Stats Cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    padding: 2rem;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gradient-primary);
+    transition: width 0.3s ease;
+  }
+
+  .stat-card:hover::before {
+    width: 8px;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .stat-icon.primary {
+    background: linear-gradient(135deg, #2874f0, #4a90e2);
+    color: white;
+  }
+
+  .stat-icon.accent {
+    background: linear-gradient(135deg, #00b894, #00a085);
+    color: white;
+  }
+
+  .stat-icon.warning {
+    background: linear-gradient(135deg, #ffa502, #ff7f50);
+    color: white;
+  }
+
+  .stat-icon.danger {
+    background: linear-gradient(135deg, #ff6161, #ff4757);
+    color: white;
+  }
+
+  .stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1;
+  }
+
+  .stat-label {
+    color: var(--gray);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Quick Actions */
+  .quick-actions {
+    padding: 0 2rem 2rem;
+  }
+
+  .action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .action-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .action-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(40, 116, 240, 0.05), transparent);
+    transition: left 0.5s;
+  }
+
+  .action-card:hover::before {
+    left: 100%;
+  }
+
+  .action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+  }
+
+  .action-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    background: var(--light);
+    transition: all 0.3s ease;
+  }
+
+  .action-card:hover .action-icon {
+    background: var(--gradient-primary);
+    color: white;
+    transform: scale(1.1);
+  }
+
+  /* Recent Activity */
+  .activity-section {
+    padding: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+    transition: all 0.3s ease;
+  }
+
+  .activity-item:hover {
+    background: rgba(40, 116, 240, 0.02);
+    transform: translateX(10px);
+  }
+
+  .activity-item:last-child {
+    border-bottom: none;
+  }
+
+  .activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    background: var(--light);
+    color: var(--primary);
+    transition: all 0.3s ease;
+  }
+
+  .activity-item:hover .activity-icon {
+    background: var(--gradient-primary);
+    color: white;
+    transform: scale(1.1);
+  }
+
+  .activity-content {
+    flex: 1;
+  }
+
+  .activity-time {
+    color: var(--gray);
+    font-size: 0.875rem;
+  }
+
+  /* Feature Cards */
+  .feature-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .feature-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Enhanced Buttons */
+  .modern-btn {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .modern-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .modern-btn:hover::before {
+    left: 100%;
+  }
+
+  .modern-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Complaints Section */
+  .complaints-section {
+    background: var(--card-bg);
+    border-radius: 16px;
+    margin-top: 2rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+
+  .modern-table {
+    background: transparent;
+  }
+
+  .modern-table thead {
+    background: var(--gradient-primary);
+    color: white;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+  }
+
+  .modern-table tbody tr:hover {
+    background: rgba(40, 116, 240, 0.05);
+    transform: scale(1.01);
+  }
+
+  /* Deactivate Account Section */
+  .deactivate-section {
+    background: linear-gradient(135deg, #fff5f5, #ffe6e6);
+    border: 1px solid #ffcccc;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-top: 2rem;
+    text-align: center;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .dashboard-container {
+      padding: 1rem 0.5rem;
+    }
+
+    .modern-sidebar {
+      position: static;
+      margin-bottom: 2rem;
+    }
+
+    .profile-hero {
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+    }
+
+    .action-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .quick-actions {
+      padding: 0 1rem 1rem;
+    }
+  }
+
+  /* Custom Animations */
+  .bounce-in {
+    animation: bounceIn 0.6s ease-out;
+  }
+
+  @keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .fade-in-up {
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Main Dashboard -->
+<div class="dashboard-container">
+  <div class="row g-4">
+    <!-- Sidebar Navigation -->
+    <div class="col-lg-3">
+      <div class="modern-sidebar" data-aos="fade-right" data-aos-duration="800">
+        <!-- Profile Quick Info -->
+        <div class="text-center mb-4 px-3">
+          <img src="{% if user.profile_pic %}{{ user.profile_pic.url }}{% else %}{% static 'default_avatar.png' %}{% endif %}" 
+               alt="Profile" class="profile-avatar mb-3 floating">
+          <h6 class="fw-bold mb-1">{{ user.name }}</h6>
+          <p class="text-muted small mb-3">{{ user.email }}</p>
+          <button class="modern-btn btn-sm w-100" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+            <i class="bi bi-pencil me-2"></i>Edit Profile
+          </button>
+        </div>
+
+        <!-- MY ORDERS -->
+        <div class="nav-section">
+          <div class="nav-section-title">MY ORDERS</div>
+          <a href="{% url 'order' %}" class="modern-nav-item">
+            <div class="modern-nav-icon">
+              <i class="bi bi-bag"></i>
+            </div>
+            Orders & Returns
+          </a>
+          <a href="{% url 'cart' %}" class="modern-nav-item">
+            <div class="modern-nav-icon">
+              <i class="bi bi-cart"></i>
+            </div>
+            Shopping Cart
+          </a>
+        </div>
+
+        <!-- ACCOUNT SETTINGS -->
+        <div class="nav-section">
+          <div class="nav-section-title">ACCOUNT SETTINGS</div>
+          <a href="#" class="modern-nav-item active">
+            <div class="modern-nav-icon">
+              <i class="bi bi-person"></i>
+            </div>
+            Profile Information
+          </a>
+          <a href="#" class="modern-nav-item">
+            <div class="modern-nav-icon">
+              <i class="bi bi-geo-alt"></i>
+            </div>
+            Manage Addresses
+          </a>
+        </div>
+
+        <!-- PAYMENTS -->
+        <div class="nav-section">
+          <div class="nav-section-title">PAYMENTS</div>
+          <a href="#" class="modern-nav-item">
+            <div class="modern-nav-icon">
+              <i class="bi bi-gift"></i>
+            </div>
+            Gift Cards
+          </a>
+          <a href="#" class="modern-nav-item">
+            <div class="modern-nav-icon">
+              <i class="bi bi-wallet"></i>
+            </div>
+            Saved UPI
+          </a>
+          <a href="#" class="modern-nav-item">
+            <div class="modern-nav-icon">
+              <i class="bi bi-credit-card"></i>
+            </div>
+            Saved Cards
+          </a>
+        </div>
+
+        <!-- MY STUFF -->
+        <div class="nav-section">
+          <div class="nav-section-title">MY STUFF</div>
+          <a href="#" class="modern-nav-item">
+            <div class="modern-nav-icon">
+              <i class="bi bi-tag"></i>
+            </div>
+            My Coupons
+          </a>
+          <a href="#" class="modern-nav-item">
+            <div class="modern-nav-icon">
+              <i class="bi bi-star"></i>
+            </div>
+            My Reviews & Ratings
+          </a>
+          <a href="#" class="modern-nav-item">
+            <div class="modern-nav-icon">
+              <i class="bi bi-bell"></i>
+            </div>
+            All Notifications
+          </a>
+          <a href="{% url 'wishlist_list' %}" class="modern-nav-item">
+            <div class="modern-nav-icon">
+              <i class="bi bi-heart"></i>
+            </div>
+            My Wishlist
+          </a>
+        </div>
+
+        <!-- Support & Logout -->
+        <div class="nav-section">
+          <a href="#complaintsSection" class="modern-nav-item" data-bs-toggle="collapse">
+            <div class="modern-nav-icon">
+              <i class="bi bi-chat-dots"></i>
+            </div>
+            Customer Support
+          </a>
+          <a href="{% url 'logout' %}" class="modern-nav-item text-danger">
+            <div class="modern-nav-icon">
+              <i class="bi bi-box-arrow-right"></i>
+            </div>
+            Logout
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-9">
+      <div class="modern-main" data-aos="fade-up" data-aos-duration="800">
+        <!-- Profile Hero Section -->
+        <div class="profile-hero">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h2 class="fw-bold mb-2">Welcome back, {{ user.name }}! 👋</h2>
+              <p class="mb-4 opacity-75">Manage your account, track orders, and explore exclusive deals</p>
+              <div class="d-flex gap-3 flex-wrap">
+                <div class="profile-badge">
+                  <i class="bi bi-shield-check"></i>
+                  Verified Shopper
+                </div>
+                <div class="profile-badge">
+                  <i class="bi bi-award"></i>
+                  Premium Member
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 text-center">
+              <img src="{% if user.profile_pic %}{{ user.profile_pic.url }}{% else %}{% static 'default_avatar.png' %}{% endif %}" 
+                   alt="Profile" class="profile-avatar">
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+          <div class="stat-card" data-aos="zoom-in" data-aos-delay="200">
+            <div class="stat-icon primary">
+              <i class="bi bi-bag"></i>
+            </div>
+            <div class="stat-value">5</div>
+            <div class="stat-label">Active Orders</div>
+          </div>
+          <div class="stat-card" data-aos="zoom-in" data-aos-delay="300">
+            <div class="stat-icon accent">
+              <i class="bi bi-cart"></i>
+            </div>
+            <div class="stat-value">3</div>
+            <div class="stat-label">Cart Items</div>
+          </div>
+          <div class="stat-card" data-aos="zoom-in" data-aos-delay="400">
+            <div class="stat-icon warning">
+              <i class="bi bi-heart"></i>
+            </div>
+            <div class="stat-value">12</div>
+            <div class="stat-label">Wishlist Items</div>
+          </div>
+          <div class="stat-card" data-aos="zoom-in" data-aos-delay="500">
+            <div class="stat-icon danger">
+              <i class="bi bi-chat-dots"></i>
+            </div>
+            <div class="stat-value">2</div>
+            <div class="stat-label">Pending Complaints</div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <h5 class="fw-bold mb-3">Quick Actions</h5>
+          <div class="action-grid">
+            <a href="#" class="action-card" data-aos="fade-up" data-aos-delay="200">
+              <div class="action-icon">
+                <i class="bi bi-bag"></i>
+              </div>
+              <h6>My Orders</h6>
+              <p class="text-muted small">Track your purchases</p>
+            </a>
+            <a href="#" class="action-card" data-aos="fade-up" data-aos-delay="300">
+              <div class="action-icon">
+                <i class="bi bi-cart"></i>
+              </div>
+              <h6>Shopping Cart</h6>
+              <p class="text-muted small">Complete your purchase</p>
+            </a>
+            <a href="{% url 'wishlist_list' %}" class="action-card" data-aos="fade-up" data-aos-delay="400">
+              <div class="action-icon">
+                <i class="bi bi-heart"></i>
+              </div>
+              <h6>Wishlist</h6>
+              <p class="text-muted small">Saved items</p>
+            </a>
+            <a href="#" class="action-card" data-aos="fade-up" data-aos-delay="500">
+              <div class="action-icon">
+                <i class="bi bi-bell"></i>
+              </div>
+              <h6>Notifications</h6>
+              <p class="text-muted small">Alerts & updates</p>
+            </a>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-section">
+          <h5 class="fw-bold mb-3">Recent Activity</h5>
+          <div class="activity-item" data-aos="fade-right" data-aos-delay="200">
+            <div class="activity-icon">
+              <i class="bi bi-bag-check"></i>
+            </div>
+            <div class="activity-content">
+              <h6 class="mb-1">Order Shipped</h6>
+              <p class="text-muted mb-0">Your order #ORD-7842 has been shipped</p>
+            </div>
+            <div class="activity-time">2 hours ago</div>
+          </div>
+          <div class="activity-item" data-aos="fade-right" data-aos-delay="300">
+            <div class="activity-icon">
+              <i class="bi bi-cart-plus"></i>
+            </div>
+            <div class="activity-content">
+              <h6 class="mb-1">Item Added</h6>
+              <p class="text-muted mb-0">Smartphone added to your cart</p>
+            </div>
+            <div class="activity-time">5 hours ago</div>
+          </div>
+          <div class="activity-item" data-aos="fade-right" data-aos-delay="400">
+            <div class="activity-icon">
+              <i class="bi bi-star"></i>
+            </div>
+            <div class="activity-content">
+              <h6 class="mb-1">Review Submitted</h6>
+              <p class="text-muted mb-0">You rated a product 5 stars</p>
+            </div>
+            <div class="activity-time">1 day ago</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Feature Sections -->
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <div class="feature-card" data-aos="flip-left" data-aos-delay="200">
+            <div class="d-flex align-items-center mb-3">
+              <div class="stat-icon danger me-3">
+                <i class="bi bi-chat-dots"></i>
+              </div>
+              <div>
+                <h5 class="fw-bold mb-0">Customer Support</h5>
+                <p class="text-muted mb-0">Get help with your issues</p>
+              </div>
+            </div>
+            <p class="mb-3">Having trouble with an order? Our support team is here to help you resolve any issues quickly.</p>
+            <button class="modern-btn w-100" data-bs-toggle="collapse" href="#complaintsSection">
+              Get Support
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="feature-card" data-aos="flip-right" data-aos-delay="300">
+            <div class="d-flex align-items-center mb-3">
+              <div class="stat-icon accent me-3">
+                <i class="bi bi-file-text"></i>
+              </div>
+              <div>
+                <h5 class="fw-bold mb-0">Order Reports</h5>
+                <p class="text-muted mb-0">View purchase history</p>
+              </div>
+            </div>
+            <p class="mb-3">Access detailed reports of your orders, track shipments, and download invoices for your records.</p>
+            <button class="modern-btn w-100" data-bs-toggle="collapse" href="#reportsSection">
+              View Reports
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPLAINTS SECTION -->
+      <div class="collapse mt-4" id="complaintsSection">
+        <div class="complaints-section p-4">
+          <h5 class="fw-bold mb-4 text-center">
+            <i class="bi bi-chat-dots-fill me-3 text-primary"></i>Customer Support & Complaints
+          </h5>
+          {% if complaints %}
+          <div class="table-responsive">
+            <table class="table modern-table table-hover">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Your Message</th>
+                  <th>Support Response</th>
+                  <th>Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for complaint in complaints %}
+                <tr data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                  <td class="fw-bold">{{ complaint.id }}</td>
+                  <td>
+                    {% if complaint.product %}
+                    <a href="{% url 'detailview' complaint.product.pk %}" class="text-decoration-none text-primary fw-semibold">
+                      {{ complaint.product.title }}
+                    </a>
+                    {% else %}
+                    <em class="text-muted">General Issue</em>
+                    {% endif %}
+                  </td>
+                  <td>{{ complaint.get_house_type_display|default:"Other" }}</td>
+                  <td>{{ complaint.message|linebreaksbr }}</td>
+                  <td>
+                    {% if complaint.reply %}
+                    <span class="text-success fw-semibold">{{ complaint.reply|linebreaksbr }}</span>
+                    {% else %}
+                    <span class="text-warning">
+                      <i class="bi bi-clock me-2"></i>Under Review
+                    </span>
+                    {% endif %}
+                  </td>
+                  <td>{{ complaint.created_at|date:"M d, Y" }}</td>
+                  <td>
+                    <form method="post" action="{% url 'profile' %}" class="d-inline">
+                      {% csrf_token %}
+                      <input type="hidden" name="delete_complaint_id" value="{{ complaint.id }}">
+                      <button type="submit" class="btn btn-sm modern-btn" style="background: var(--gradient-danger);" onclick="return confirm('Are you sure you want to delete this complaint?');">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 4rem; color: var(--gray);"></i>
+            <p class="text-muted mt-3">No complaints submitted yet.</p>
+          </div>
+          {% endif %}
+
+          <!-- Report Form -->
+          <div class="feature-card mt-4">
+            <h5 class="fw-bold text-center mb-4">
+              <i class="bi bi-send-fill me-3 text-primary"></i>Submit New Complaint
+            </h5>
+            <form method="post" novalidate>
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-md-6 mb-3" data-aos="fade-right" data-aos-delay="200">
+                  {{ report_form.subject.label_tag }}
+                  {{ report_form.subject|add_class:"form-control" }}
+                  {% if report_form.subject.errors %}
+                  <div class="text-danger small">{{ report_form.subject.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3" data-aos="fade-left" data-aos-delay="300">
+                  <label class="form-label">Priority</label>
+                  <select class="form-control">
+                    <option>Low</option>
+                    <option>Medium</option>
+                    <option>High</option>
+                    <option>Urgent</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-4" data-aos="fade-up" data-aos-delay="400">
+                {{ report_form.message.label_tag }}
+                {{ report_form.message|add_class:"form-control" }}
+                {% if report_form.message.errors %}
+                <div class="text-danger small">{{ report_form.message.errors }}</div>
+                {% endif %}
+              </div>
+              <button type="submit" name="submit_report" class="modern-btn w-100" data-aos="zoom-in" data-aos-delay="500">
+                <i class="bi bi-send me-2"></i>Submit Complaint
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORTS SECTION -->
+      <div class="collapse mt-4" id="reportsSection">
+        <div class="complaints-section p-4">
+          <h3 class="text-center fw-bold mb-5">
+            <i class="bi bi-file-text-fill me-3 text-primary"></i>Order Reports & History
+          </h3>
+          {% if replied_reports %}
+          <div class="row g-4">
+            {% for report in replied_reports %}
+            <div class="col-md-6 col-lg-4">
+              <div class="feature-card h-100" data-aos="flip-up" data-aos-delay="{{ forloop.counter0|add:200 }}">
+                <div class="text-center mb-3">
+                  <i class="bi bi-patch-check-fill" style="font-size: 2.5rem; color: var(--success);"></i>
+                </div>
+                <h6 class="fw-bold mb-3">{{ report.subject }}</h6>
+                <p class="text-muted small mb-3">
+                  <i class="bi bi-calendar-event me-2"></i>{{ report.replied_at|date:"M d, Y H:i" }}
+                </p>
+                <div class="text-dark">{{ report.admin_reply|linebreaks }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <i class="bi bi-file-earmark-text" style="font-size: 4rem; color: var(--gray);"></i>
+            <p class="text-muted mt-3">No reports available yet.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- DEACTIVATE ACCOUNT SECTION -->
+      <div class="deactivate-section mt-4" data-aos="fade-up" data-aos-delay="400">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h5 class="fw-bold text-danger mb-2">Deactivate Account</h5>
+            <p class="text-muted mb-0">This will permanently delete your account and all associated data. This action cannot be undone.</p>
+          </div>
+          <div class="col-md-4 text-end">
+            <button class="modern-btn" style="background: var(--gradient-danger);" data-bs-toggle="modal" data-bs-target="#deactivateModal">
+              <i class="bi bi-trash me-2"></i>Deactivate Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Edit Profile Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-4 text-center">
+              <div class="mb-3">
+                <img id="profile-preview" 
+                     src="{% if user.profile_pic %}{{ user.profile_pic.url }}{% else %}{% static 'default_avatar.png' %}{% endif %}" 
+                     alt="Profile" class="profile-avatar mb-3">
+                <label for="id_profile_pic" class="modern-btn btn-sm w-100">
+                  <i class="bi bi-camera me-2"></i>Change Photo
+                </label>
+                <input type="file" name="profile_pic" id="id_profile_pic" class="d-none" accept="image/*">
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Username</label>
+                  <input type="text" class="form-control" name="username" value="{{ user.username }}">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Full Name</label>
+                  <input type="text" class="form-control" name="name" value="{{ user.name }}">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Phone Number</label>
+                  <input type="tel" class="form-control" name="phone" value="{{ user.phone }}">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Email Address</label>
+                  <input type="email" class="form-control" name="email" value="{{ user.email }}">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Delivery Address</label>
+                  <textarea class="form-control" name="address" rows="3">{{ user.address }}</textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0 mt-3">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="modern-btn">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Deactivate Account Modal -->
+<div class="modal fade" id="deactivateModal" tabindex="-1" aria-labelledby="deactivateModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title text-danger fw-bold">Confirm Account Deactivation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 3rem;"></i>
+        <h5 class="my-3">Are you sure you want to deactivate your account?</h5>
+        <p class="text-muted">This action cannot be undone. All your data, including orders, wishlist, and preferences will be permanently deleted.</p>
+        <div class="form-check mb-3 text-start">
+          <input class="form-check-input" type="checkbox" id="confirmDeactivate">
+          <label class="form-check-label" for="confirmDeactivate">
+            I understand this action is permanent and cannot be reversed
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="modern-btn" style="background: var(--gradient-danger);" disabled id="deactivateConfirm">
+          Yes, Deactivate My Account
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% include 'footer.html' %}
+
+<script>
+  // Profile image preview with animation
+  document.getElementById('id_profile_pic').addEventListener('change', function(e) {
+    const preview = document.getElementById('profile-preview');
+    const file = e.target.files[0];
+    
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        // Add bounce animation
+        preview.classList.add('bounce-in');
+        setTimeout(() => {
+          preview.classList.remove('bounce-in');
+        }, 600);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Deactivate account confirmation
+  document.getElementById('confirmDeactivate').addEventListener('change', function() {
+    document.getElementById('deactivateConfirm').disabled = !this.checked;
+  });
+
+  // Initialize animations
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to interactive elements
+    const interactiveElements = document.querySelectorAll('.stat-card, .action-card, .feature-card, .modern-nav-item');
+    interactiveElements.forEach(element => {
+      element.addEventListener('mouseenter', function() {
+        this.style.transform = this.style.transform.includes('translateY') 
+          ? this.style.transform 
+          : 'translateY(-5px)';
+      });
+      
+      element.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+
+    // Initialize AOS
+    if (typeof AOS !== 'undefined') {
+      AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+      });
+    }
+
+    // Smooth scroll for collapse sections
+    const collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+    collapseElements.forEach(element => {
+      element.addEventListener('click', function() {
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          setTimeout(() => {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 300);
+        }
+      });
+    });
+
+    // Add floating animation to profile avatar
+    const profileAvatar = document.querySelector('.profile-avatar');
+    if (profileAvatar) {
+      setInterval(() => {
+        profileAvatar.classList.toggle('floating');
+      }, 3000);
+    }
+  });
+
+  // GSAP animations for enhanced interactions
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Animate stats cards on scroll
+  gsap.utils.toArray('.stat-card').forEach((card, i) => {
+    gsap.fromTo(card, 
+      { y: 50, opacity: 0 },
+      { 
+        y: 0, 
+        opacity: 1, 
+        duration: 0.6,
+        delay: i * 0.1,
+        scrollTrigger: {
+          trigger: card,
+          start: "top 80%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+  });
+</script>
+
+<!-- AOS JS -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init();
+</script>
+{% endblock %}

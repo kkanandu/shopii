@@ -1,0 +1,1066 @@
+{% extends 'header.html' %}
+{% load static widget_tweaks %}
+{% load humanize %}
+{% block header %}
+<!-- AOS CSS -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+  /* Orders Page Specific Styles */
+  :root {
+    --primary: #2874f0;
+    --primary-light: #4a90e2;
+    --primary-dark: #1c60d1;
+    --secondary: #ff6161;
+    --accent: #00b894;
+    --warning: #ffa502;
+    --success: #00b894;
+    --dark: #172337;
+    --light: #f5f5f5;
+    --gray: #878787;
+    --border: #e0e0e0;
+    --card-bg: #ffffff;
+    --shadow-sm: 0 2px 15px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 15px 50px rgba(0, 0, 0, 0.15);
+    --gradient-primary: linear-gradient(135deg, #2874f0, #4a90e2);
+    --gradient-accent: linear-gradient(135deg, #00b894, #00a085);
+    --gradient-warning: linear-gradient(135deg, #ffa502, #ff7f50);
+    --gradient-danger: linear-gradient(135deg, #ff6161, #ff4757);
+  }
+
+  .orders-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  /* Orders Hero Section */
+  .orders-hero {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+
+  .orders-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .orders-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    animation: float 8s ease-in-out infinite reverse;
+  }
+
+  /* Orders Navigation */
+  .orders-nav {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+
+  .orders-nav-tabs {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .orders-nav-tab {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    background: var(--light);
+    color: var(--dark);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .orders-nav-tab::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-primary);
+    transition: left 0.3s ease;
+    z-index: 1;
+  }
+
+  .orders-nav-tab span {
+    position: relative;
+    z-index: 2;
+  }
+
+  .orders-nav-tab:hover::before,
+  .orders-nav-tab.active::before {
+    left: 0;
+  }
+
+  .orders-nav-tab:hover,
+  .orders-nav-tab.active {
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Orders Filters */
+  .orders-filters {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+
+  .filter-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .filter-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .filter-title {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .filter-option {
+    padding: 0.5rem 1rem;
+    background: var(--light);
+    border-radius: 20px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+  }
+
+  .filter-option:hover,
+  .filter-option.active {
+    background: var(--gradient-primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Search Box */
+  .orders-search {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .orders-search input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--light);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .orders-search input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(40, 116, 240, 0.1);
+    background: white;
+  }
+
+  .orders-search i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray);
+  }
+
+  /* Orders Grid */
+  .orders-grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  /* Order Card */
+  .order-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .order-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: var(--gradient-primary);
+    transition: width 0.3s ease;
+  }
+
+  .order-card:hover::before {
+    width: 8px;
+  }
+
+  .order-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .order-card.delivered::before {
+    background: var(--gradient-accent);
+  }
+
+  .order-card.cancelled::before {
+    background: var(--gradient-danger);
+  }
+
+  .order-card.returned::before {
+    background: var(--gradient-warning);
+  }
+
+  .order-card.ontheway::before {
+    background: linear-gradient(135deg, #ffa502, #ff7f50);
+  }
+
+  .order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .order-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .order-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .order-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .status-delivered {
+    background: rgba(0, 184, 148, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(0, 184, 148, 0.2);
+  }
+
+  .status-cancelled {
+    background: rgba(255, 97, 97, 0.1);
+    color: var(--secondary);
+    border: 1px solid rgba(255, 97, 97, 0.2);
+  }
+
+  .status-returned {
+    background: rgba(255, 165, 2, 0.1);
+    color: var(--warning);
+    border: 1px solid rgba(255, 165, 2, 0.2);
+  }
+
+  .status-ontheway {
+    background: rgba(40, 116, 240, 0.1);
+    color: var(--primary);
+    border: 1px solid rgba(40, 116, 240, 0.2);
+  }
+
+  .order-date {
+    color: var(--gray);
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .order-content {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .order-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .order-image::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    animation: shine 3s infinite;
+  }
+
+  .order-details {
+    flex: 1;
+  }
+
+  .order-product {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+  }
+
+  .order-variant {
+    color: var(--gray);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+  }
+
+  .order-price {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .current-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .original-price {
+    font-size: 1rem;
+    color: var(--gray);
+    text-decoration: line-through;
+  }
+
+  .order-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 150px;
+  }
+
+  .order-btn {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  /* Order Timeline */
+  .order-timeline {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .timeline-title {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--dark);
+  }
+
+  .timeline-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  .timeline-steps::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--border);
+    z-index: 1;
+  }
+
+  .timeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .step-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--light);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .step-active .step-icon {
+    background: var(--gradient-primary);
+    border-color: var(--primary);
+    color: white;
+  }
+
+  .step-completed .step-icon {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+
+  .step-label {
+    font-size: 0.75rem;
+    color: var(--gray);
+    text-align: center;
+  }
+
+  .step-active .step-label {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  .step-completed .step-label {
+    color: var(--success);
+  }
+
+  /* Empty State */
+  .orders-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    color: var(--gray);
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 1rem;
+  }
+
+  .empty-description {
+    color: var(--gray);
+    margin-bottom: 2rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Animations */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes shine {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .slide-in-up {
+    animation: slideInUp 0.6s ease-out;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .orders-container {
+      padding: 1rem 0.5rem;
+    }
+
+    .order-content {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    .order-actions {
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .order-header {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .orders-nav-tabs {
+      justify-content: center;
+    }
+
+    .timeline-steps {
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .timeline-steps::before {
+      display: none;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="orders-container">
+  <!-- Orders Hero Section -->
+  <div class="orders-hero" data-aos="fade-up">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="fw-bold mb-2">My Orders 📦</h1>
+        <p class="mb-0 opacity-75">Track, manage, and review your purchases all in one place</p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="floating" style="font-size: 4rem;">🚚</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Navigation -->
+  <div class="orders-nav" data-aos="fade-up" data-aos-delay="100">
+    <div class="orders-nav-tabs">
+      <a href="#" class="orders-nav-tab active">
+        <span>All Orders</span>
+      </a>
+      <a href="#" class="orders-nav-tab">
+        <span>On the Way</span>
+      </a>
+      <a href="#" class="orders-nav-tab">
+        <span>Delivered</span>
+      </a>
+      <a href="#" class="orders-nav-tab">
+        <span>Cancelled</span>
+      </a>
+      <a href="#" class="orders-nav-tab">
+        <span>Returned</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Orders Filters -->
+  <div class="orders-filters" data-aos="fade-up" data-aos-delay="200">
+    <div class="orders-search">
+      <i class="bi bi-search"></i>
+      <input type="text" placeholder="Search your orders here...">
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="filter-section">
+          <div class="filter-title">
+            <i class="bi bi-tag"></i>
+            ORDER STATUS
+          </div>
+          <div class="filter-options">
+            <div class="filter-option active">All</div>
+            <div class="filter-option">On the way</div>
+            <div class="filter-option">Delivered</div>
+            <div class="filter-option">Cancelled</div>
+            <div class="filter-option">Returned</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="filter-section">
+          <div class="filter-title">
+            <i class="bi bi-calendar"></i>
+            ORDER TIME
+          </div>
+          <div class="filter-options">
+            <div class="filter-option active">All</div>
+            <div class="filter-option">Last 30 days</div>
+            <div class="filter-option">2024</div>
+            <div class="filter-option">2023</div>
+            <div class="filter-option">2022</div>
+            <div class="filter-option">2021</div>
+            <div class="filter-option">Older</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Grid -->
+  <div class="orders-grid">
+    <!-- Order Card 1 -->
+    <div class="order-card delivered" data-aos="zoom-in" data-aos-delay="300">
+      <div class="order-header">
+        <div>
+          <div class="order-title">Order #ORD-7842</div>
+          <div class="order-meta">
+            <div class="order-status status-delivered">
+              <i class="bi bi-check-circle"></i>
+              Delivered
+            </div>
+            <div class="order-date">
+              <i class="bi bi-calendar"></i>
+              Delivered on Jul 08, 2021
+            </div>
+          </div>
+        </div>
+        <div class="order-actions">
+          <a href="#" class="order-btn btn-primary">
+            <i class="bi bi-star"></i>
+            Rate & Review
+          </a>
+        </div>
+      </div>
+
+      <div class="order-content">
+        <div class="order-image">
+          <i class="bi bi-camera"></i>
+        </div>
+        <div class="order-details">
+          <div class="order-product">ITGood Bluetooth Remote Camera Remote Control</div>
+          <div class="order-variant">Color: Black</div>
+          <div class="order-price">
+            <span class="current-price">₹1,227</span>
+            <span class="original-price">₹1,604</span>
+          </div>
+          <div class="text-success">
+            <i class="bi bi-check-circle"></i>
+            Your item has been delivered
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Card 2 -->
+    <div class="order-card delivered" data-aos="zoom-in" data-aos-delay="400">
+      <div class="order-header">
+        <div>
+          <div class="order-title">Order #ORD-7843</div>
+          <div class="order-meta">
+            <div class="order-status status-delivered">
+              <i class="bi bi-check-circle"></i>
+              Delivered
+            </div>
+            <div class="order-date">
+              <i class="bi bi-calendar"></i>
+              Delivered on Jul 09, 2021
+            </div>
+          </div>
+        </div>
+        <div class="order-actions">
+          <a href="#" class="order-btn btn-primary">
+            <i class="bi bi-star"></i>
+            Rate & Review
+          </a>
+        </div>
+      </div>
+
+      <div class="order-content">
+        <div class="order-image">
+          <i class="bi bi-phone"></i>
+        </div>
+        <div class="order-details">
+          <div class="order-product">ADCOM AD-Bint Lens Mobile Phone Lens</div>
+          <div class="order-variant">Color: Black</div>
+          <div class="order-price">
+            <span class="current-price">₹11,990</span>
+            <span class="original-price">₹11,699</span>
+          </div>
+          <div class="text-success">
+            <i class="bi bi-check-circle"></i>
+            Your item has been delivered
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Card 3 - On the Way -->
+    <div class="order-card ontheway" data-aos="zoom-in" data-aos-delay="500">
+      <div class="order-header">
+        <div>
+          <div class="order-title">Order #ORD-7844</div>
+          <div class="order-meta">
+            <div class="order-status status-ontheway">
+              <i class="bi bi-truck"></i>
+              On the Way
+            </div>
+            <div class="order-date">
+              <i class="bi bi-calendar"></i>
+              Expected by Oct 18, 2025
+            </div>
+          </div>
+        </div>
+        <div class="order-actions">
+          <a href="#" class="order-btn btn-primary">
+            <i class="bi bi-geo-alt"></i>
+            Track Order
+          </a>
+        </div>
+      </div>
+
+      <div class="order-content">
+        <div class="order-image">
+          <i class="bi bi-camera-tripod"></i>
+        </div>
+        <div class="order-details">
+          <div class="order-product">Kodak T211 Tripod</div>
+          <div class="order-variant">Color: Black</div>
+          <div class="order-price">
+            <span class="current-price">₹2,499</span>
+            <span class="original-price">₹3,199</span>
+          </div>
+          <div class="text-primary">
+            <i class="bi bi-truck"></i>
+            Shipped via Express Delivery
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Timeline -->
+      <div class="order-timeline">
+        <div class="timeline-title">Delivery Progress</div>
+        <div class="timeline-steps">
+          <div class="timeline-step step-completed">
+            <div class="step-icon">
+              <i class="bi bi-bag-check"></i>
+            </div>
+            <div class="step-label">Ordered</div>
+          </div>
+          <div class="timeline-step step-completed">
+            <div class="step-icon">
+              <i class="bi bi-gear"></i>
+            </div>
+            <div class="step-label">Processing</div>
+          </div>
+          <div class="timeline-step step-completed">
+            <div class="step-icon">
+              <i class="bi bi-box-seam"></i>
+            </div>
+            <div class="step-label">Shipped</div>
+          </div>
+          <div class="timeline-step step-active">
+            <div class="step-icon">
+              <i class="bi bi-truck"></i>
+            </div>
+            <div class="step-label">On the Way</div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-icon">
+              <i class="bi bi-house-door"></i>
+            </div>
+            <div class="step-label">Delivered</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Card 4 - Returned -->
+    <div class="order-card returned" data-aos="zoom-in" data-aos-delay="600">
+      <div class="order-header">
+        <div>
+          <div class="order-title">Order #ORD-7845</div>
+          <div class="order-meta">
+            <div class="order-status status-returned">
+              <i class="bi bi-arrow-return-left"></i>
+              Returned
+            </div>
+            <div class="order-date">
+              <i class="bi bi-calendar"></i>
+              Returned on Sep 12, 2025
+            </div>
+          </div>
+        </div>
+        <div class="order-actions">
+          <a href="#" class="order-btn btn-primary">
+            <i class="bi bi-cart-plus"></i>
+            Buy Again
+          </a>
+        </div>
+      </div>
+
+      <div class="order-content">
+        <div class="order-image">
+          <i class="bi bi-camera-video"></i>
+        </div>
+        <div class="order-details">
+          <div class="order-product">GoPro HERO9 Action Camera</div>
+          <div class="order-variant">Color: Black</div>
+          <div class="order-price">
+            <span class="current-price">₹35,999</span>
+            <span class="original-price">₹39,999</span>
+          </div>
+          <div class="text-warning">
+            <i class="bi bi-info-circle"></i>
+            Return completed - Refund processed
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load More Section -->
+  <div class="text-center mt-4" data-aos="fade-up" data-aos-delay="700">
+    <button class="order-btn btn-outline" style="min-width: 200px;">
+      <i class="bi bi-arrow-clockwise"></i>
+      Load More Orders
+    </button>
+  </div>
+</div>
+
+<script>
+  // Initialize animations
+  document.addEventListener('DOMContentLoaded', function() {
+    // Filter options interaction
+    const filterOptions = document.querySelectorAll('.filter-option');
+    filterOptions.forEach(option => {
+      option.addEventListener('click', function() {
+        // Remove active class from all options in the same section
+        const parent = this.parentElement;
+        parent.querySelectorAll('.filter-option').forEach(opt => {
+          opt.classList.remove('active');
+        });
+        
+        // Add active class to clicked option
+        this.classList.add('active');
+        
+        // Add animation effect
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          this.style.transform = 'scale(1)';
+        }, 150);
+      });
+    });
+
+    // Order navigation tabs
+    const navTabs = document.querySelectorAll('.orders-nav-tab');
+    navTabs.forEach(tab => {
+      tab.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Remove active class from all tabs
+        navTabs.forEach(t => t.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        this.classList.add('active');
+        
+        // Add ripple effect
+        const ripple = document.createElement('span');
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+        
+        ripple.style.cssText = `
+          position: absolute;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.6);
+          transform: scale(0);
+          animation: ripple 0.6s linear;
+          pointer-events: none;
+          width: ${size}px;
+          height: ${size}px;
+          left: ${x}px;
+          top: ${y}px;
+        `;
+        
+        this.appendChild(ripple);
+        
+        setTimeout(() => {
+          ripple.remove();
+        }, 600);
+      });
+    });
+
+    // Order card hover effects
+    const orderCards = document.querySelectorAll('.order-card');
+    orderCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-8px)';
+      });
+      
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+
+    // Search functionality
+    const searchInput = document.querySelector('.orders-search input');
+    searchInput.addEventListener('focus', function() {
+      this.parentElement.style.boxShadow = '0 0 0 3px rgba(40, 116, 240, 0.1)';
+    });
+    
+    searchInput.addEventListener('blur', function() {
+      this.parentElement.style.boxShadow = 'none';
+    });
+
+    // Initialize AOS
+    if (typeof AOS !== 'undefined') {
+      AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+      });
+    }
+
+    // GSAP animations
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Animate order cards on scroll
+    gsap.utils.toArray('.order-card').forEach((card, i) => {
+      gsap.fromTo(card, 
+        { y: 50, opacity: 0 },
+        { 
+          y: 0, 
+          opacity: 1, 
+          duration: 0.6,
+          delay: i * 0.1,
+          scrollTrigger: {
+            trigger: card,
+            start: "top 80%",
+            toggleActions: "play none none none"
+          }
+        }
+      );
+    });
+
+    // Floating animation for hero icon
+    const floatingIcon = document.querySelector('.floating');
+    if (floatingIcon) {
+      setInterval(() => {
+        floatingIcon.style.animation = 'none';
+        setTimeout(() => {
+          floatingIcon.style.animation = 'float 3s ease-in-out infinite';
+        }, 10);
+      }, 3000);
+    }
+  });
+
+  // Ripple animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+
+<!-- AOS JS -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init();
+</script>
+{% endblock %}

@@ -1,0 +1,1136 @@
+{% extends 'header.html' %}
+{% load static widget_tweaks %}
+{% load humanize %}
+{% block header %}
+<!-- AOS CSS -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+  /* Cart Page Specific Styles */
+  :root {
+    --primary: #2874f0;
+    --primary-light: #4a90e2;
+    --primary-dark: #1c60d1;
+    --secondary: #ff6161;
+    --accent: #00b894;
+    --warning: #ffa502;
+    --success: #00b894;
+    --dark: #172337;
+    --light: #f5f5f5;
+    --gray: #878787;
+    --border: #e0e0e0;
+    --card-bg: #ffffff;
+    --shadow-sm: 0 2px 15px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 15px 50px rgba(0, 0, 0, 0.15);
+    --gradient-primary: linear-gradient(135deg, #2874f0, #4a90e2);
+    --gradient-accent: linear-gradient(135deg, #00b894, #00a085);
+    --gradient-warning: linear-gradient(135deg, #ffa502, #ff7f50);
+    --gradient-danger: linear-gradient(135deg, #ff6161, #ff4757);
+  }
+
+  .cart-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  /* Cart Hero Section */
+  .cart-hero {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+
+  .cart-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .cart-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    animation: float 8s ease-in-out infinite reverse;
+  }
+
+  /* Cart Layout */
+  .cart-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  /* Cart Items Section */
+  .cart-items {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+  }
+
+  .cart-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .cart-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .cart-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  /* Cart Item Card */
+  .cart-item {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    background: var(--light);
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cart-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gradient-primary);
+    transition: width 0.3s ease;
+  }
+
+  .cart-item:hover::before {
+    width: 6px;
+  }
+
+  .cart-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .item-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .item-image::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    animation: shine 3s infinite;
+  }
+
+  .item-details {
+    flex: 1;
+  }
+
+  .item-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+  }
+
+  .item-variant {
+    color: var(--gray);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+  }
+
+  .item-features {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .feature-tag {
+    padding: 0.25rem 0.75rem;
+    background: rgba(40, 116, 240, 0.1);
+    color: var(--primary);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .item-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: white;
+    border-radius: 12px;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+  }
+
+  .quantity-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: var(--light);
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .quantity-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: scale(1.1);
+  }
+
+  .quantity-input {
+    width: 50px;
+    text-align: center;
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .quantity-input:focus {
+    outline: none;
+  }
+
+  .remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .remove-btn:hover {
+    background: rgba(255, 97, 97, 0.1);
+    transform: scale(1.05);
+  }
+
+  .item-pricing {
+    text-align: right;
+    min-width: 150px;
+  }
+
+  .current-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .original-price {
+    font-size: 0.875rem;
+    color: var(--gray);
+    text-decoration: line-through;
+    margin-bottom: 0.5rem;
+  }
+
+  .discount-badge {
+    background: var(--gradient-accent);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* Cart Summary */
+  .cart-summary {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    position: sticky;
+    top: 100px;
+  }
+
+  .summary-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .summary-item:last-child {
+    border-bottom: none;
+  }
+
+  .summary-label {
+    color: var(--gray);
+  }
+
+  .summary-value {
+    font-weight: 600;
+    color: var(--dark);
+  }
+
+  .summary-total {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .total-amount {
+    font-size: 1.5rem;
+    color: var(--primary);
+  }
+
+  /* Delivery Options */
+  .delivery-options {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background: var(--light);
+    border-radius: 12px;
+  }
+
+  .delivery-title {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--dark);
+  }
+
+  .delivery-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .delivery-option:hover {
+    border-color: var(--primary);
+    background: rgba(40, 116, 240, 0.05);
+  }
+
+  .delivery-option.selected {
+    border-color: var(--primary);
+    background: rgba(40, 116, 240, 0.1);
+  }
+
+  .option-radio {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .option-radio::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .delivery-option.selected .option-radio::after {
+    opacity: 1;
+  }
+
+  .option-details {
+    flex: 1;
+  }
+
+  .option-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .option-description {
+    font-size: 0.875rem;
+    color: var(--gray);
+  }
+
+  .option-price {
+    font-weight: 600;
+    color: var(--dark);
+  }
+
+  /* Checkout Button */
+  .checkout-btn {
+    width: 100%;
+    padding: 1.25rem;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .checkout-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .checkout-btn:hover::before {
+    left: 100%;
+  }
+
+  .checkout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .checkout-btn:active {
+    transform: translateY(0);
+  }
+
+  /* Security Badges */
+  .security-badges {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .security-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--gray);
+  }
+
+  /* Empty Cart State */
+  .empty-cart {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    color: var(--gray);
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 1rem;
+  }
+
+  .empty-description {
+    color: var(--gray);
+    margin-bottom: 2rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Continue Shopping Button */
+  .continue-shopping {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    background: var(--gradient-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .continue-shopping:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    color: white;
+  }
+
+  /* Promotional Banner */
+  .promo-banner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .promo-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    animation: shine 3s infinite;
+  }
+
+  .promo-text {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Animations */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes shine {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .slide-in-up {
+    animation: slideInUp 0.6s ease-out;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .pulse-animation {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .cart-layout {
+      grid-template-columns: 1fr;
+    }
+    
+    .cart-summary {
+      position: static;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .cart-container {
+      padding: 1rem 0.5rem;
+    }
+
+    .cart-item {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    .item-image {
+      margin: 0 auto;
+    }
+
+    .item-actions {
+      justify-content: center;
+    }
+
+    .item-pricing {
+      text-align: center;
+    }
+
+    .cart-actions {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .feature-tag {
+      font-size: 0.7rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-container">
+  <!-- Cart Hero Section -->
+  <div class="cart-hero" data-aos="fade-up">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="fw-bold mb-2">Shopping Cart 🛒</h1>
+        <p class="mb-0 opacity-75">Review your items and proceed to checkout</p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="floating" style="font-size: 4rem;">📦</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Promotional Banner -->
+  <div class="promo-banner" data-aos="zoom-in" data-aos-delay="100">
+    <div class="promo-text">
+      <h5 class="fw-bold mb-2">🎉 Special Offer!</h5>
+      <p class="mb-0">Get 15% off on orders above ₹5,000. Use code: <strong>CART15</strong></p>
+    </div>
+  </div>
+
+  <div class="cart-layout">
+    <!-- Cart Items Section -->
+    <div class="cart-items" data-aos="fade-right" data-aos-delay="200">
+      <div class="cart-header">
+        <div class="cart-title">
+          <i class="bi bi-cart3"></i>
+          My Cart (3 Items)
+        </div>
+        <div class="cart-actions">
+          <button class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-arrow-clockwise"></i> Update Cart
+          </button>
+          <button class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-trash"></i> Clear All
+          </button>
+        </div>
+      </div>
+
+      <!-- Cart Item 1 -->
+      <div class="cart-item" data-aos="slide-in-up" data-aos-delay="300">
+        <div class="item-image">
+          <i class="bi bi-camera"></i>
+        </div>
+        <div class="item-details">
+          <div class="item-name">ITGood Bluetooth Remote Camera Remote Control</div>
+          <div class="item-variant">Color: Black | Model: ITG-BT2024</div>
+          <div class="item-features">
+            <span class="feature-tag">Wireless</span>
+            <span class="feature-tag">30m Range</span>
+            <span class="feature-tag">iOS & Android</span>
+          </div>
+          <div class="item-actions">
+            <div class="quantity-controls">
+              <button class="quantity-btn" onclick="updateQuantity('item1', -1)">-</button>
+              <input type="text" class="quantity-input" value="1" id="quantity-item1" readonly>
+              <button class="quantity-btn" onclick="updateQuantity('item1', 1)">+</button>
+            </div>
+            <button class="remove-btn" onclick="removeItem('item1')">
+              <i class="bi bi-trash"></i> Remove
+            </button>
+            <button class="remove-btn">
+              <i class="bi bi-heart"></i> Save for Later
+            </button>
+          </div>
+        </div>
+        <div class="item-pricing">
+          <div class="current-price">₹1,227</div>
+          <div class="original-price">₹1,604</div>
+          <div class="discount-badge">Save ₹377</div>
+        </div>
+      </div>
+
+      <!-- Cart Item 2 -->
+      <div class="cart-item" data-aos="slide-in-up" data-aos-delay="400">
+        <div class="item-image">
+          <i class="bi bi-phone"></i>
+        </div>
+        <div class="item-details">
+          <div class="item-name">ADCOM AD-Bint Lens Mobile Phone Lens</div>
+          <div class="item-variant">Color: Black | Kit: 3-in-1 Professional</div>
+          <div class="item-features">
+            <span class="feature-tag">Wide Angle</span>
+            <span class="feature-tag">Macro Lens</span>
+            <span class="feature-tag">Fish Eye</span>
+          </div>
+          <div class="item-actions">
+            <div class="quantity-controls">
+              <button class="quantity-btn" onclick="updateQuantity('item2', -1)">-</button>
+              <input type="text" class="quantity-input" value="1" id="quantity-item2" readonly>
+              <button class="quantity-btn" onclick="updateQuantity('item2', 1)">+</button>
+            </div>
+            <button class="remove-btn" onclick="removeItem('item2')">
+              <i class="bi bi-trash"></i> Remove
+            </button>
+            <button class="remove-btn">
+              <i class="bi bi-heart"></i> Save for Later
+            </button>
+          </div>
+        </div>
+        <div class="item-pricing">
+          <div class="current-price">₹11,990</div>
+          <div class="original-price">₹13,699</div>
+          <div class="discount-badge">Save ₹1,709</div>
+        </div>
+      </div>
+
+      <!-- Cart Item 3 -->
+      <div class="cart-item" data-aos="slide-in-up" data-aos-delay="500">
+        <div class="item-image">
+          <i class="bi bi-camera-tripod"></i>
+        </div>
+        <div class="item-details">
+          <div class="item-name">Kodak T211 Tripod Stand</div>
+          <div class="item-variant">Color: Black | Height: 65 inches</div>
+          <div class="item-features">
+            <span class="feature-tag">Aluminum</span>
+            <span class="feature-tag">360° Rotation</span>
+            <span class="feature-tag">Phone & Camera</span>
+          </div>
+          <div class="item-actions">
+            <div class="quantity-controls">
+              <button class="quantity-btn" onclick="updateQuantity('item3', -1)">-</button>
+              <input type="text" class="quantity-input" value="1" id="quantity-item3" readonly>
+              <button class="quantity-btn" onclick="updateQuantity('item3', 1)">+</button>
+            </div>
+            <button class="remove-btn" onclick="removeItem('item3')">
+              <i class="bi bi-trash"></i> Remove
+            </button>
+            <button class="remove-btn">
+              <i class="bi bi-heart"></i> Save for Later
+            </button>
+          </div>
+        </div>
+        <div class="item-pricing">
+          <div class="current-price">₹2,499</div>
+          <div class="original-price">₹3,199</div>
+          <div class="discount-badge">Save ₹700</div>
+        </div>
+      </div>
+
+      <!-- Recently Viewed -->
+      <div class="mt-4" data-aos="fade-up" data-aos-delay="600">
+        <h5 class="fw-bold mb-3">Recently Viewed Items</h5>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="cart-item" style="padding: 1rem; cursor: pointer;">
+              <div class="item-image" style="width: 80px; height: 80px; font-size: 1.5rem;">
+                <i class="bi bi-camera-video"></i>
+              </div>
+              <div class="item-details">
+                <div class="item-name" style="font-size: 0.875rem;">GoPro HERO9</div>
+                <div class="current-price" style="font-size: 1rem;">₹35,999</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="cart-item" style="padding: 1rem; cursor: pointer;">
+              <div class="item-image" style="width: 80px; height: 80px; font-size: 1.5rem;">
+                <i class="bi bi-mic"></i>
+              </div>
+              <div class="item-details">
+                <div class="item-name" style="font-size: 0.875rem;">Studio Mic</div>
+                <div class="current-price" style="font-size: 1rem;">₹4,299</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="cart-item" style="padding: 1rem; cursor: pointer;">
+              <div class="item-image" style="width: 80px; height: 80px; font-size: 1.5rem;">
+                <i class="bi bi-brightness-high"></i>
+              </div>
+              <div class="item-details">
+                <div class="item-name" style="font-size: 0.875rem;">Ring Light</div>
+                <div class="current-price" style="font-size: 1rem;">₹1,899</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart Summary Section -->
+    <div class="cart-summary" data-aos="fade-left" data-aos-delay="200">
+      <div class="summary-title">
+        <i class="bi bi-receipt"></i>
+        Order Summary
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">Subtotal (3 items)</span>
+        <span class="summary-value">₹15,716</span>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">Discount</span>
+        <span class="summary-value text-success">-₹2,786</span>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">Shipping</span>
+        <span class="summary-value">₹99</span>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">Tax</span>
+        <span class="summary-value">₹472</span>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">Promo Applied</span>
+        <span class="summary-value text-success">-₹200</span>
+      </div>
+
+      <div class="summary-item" style="border-top: 2px solid var(--border); padding-top: 1.5rem;">
+        <span class="summary-total">Total Amount</span>
+        <span class="total-amount">₹13,301</span>
+      </div>
+
+      <!-- Delivery Options -->
+      <div class="delivery-options">
+        <div class="delivery-title">Delivery Options</div>
+        
+        <div class="delivery-option selected" onclick="selectDelivery('standard')">
+          <div class="option-radio"></div>
+          <div class="option-details">
+            <div class="option-name">Standard Delivery</div>
+            <div class="option-description">4-7 business days</div>
+          </div>
+          <div class="option-price">₹99</div>
+        </div>
+
+        <div class="delivery-option" onclick="selectDelivery('express')">
+          <div class="option-radio"></div>
+          <div class="option-details">
+            <div class="option-name">Express Delivery</div>
+            <div class="option-description">2-3 business days</div>
+          </div>
+          <div class="option-price">₹199</div>
+        </div>
+
+        <div class="delivery-option" onclick="selectDelivery('nextday')">
+          <div class="option-radio"></div>
+          <div class="option-details">
+            <div class="option-name">Next Day Delivery</div>
+            <div class="option-description">Order before 6 PM</div>
+          </div>
+          <div class="option-price">₹399</div>
+        </div>
+      </div>
+
+      <!-- Apply Promo Code -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Promo Code</label>
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Enter promo code">
+          <button class="btn btn-primary">Apply</button>
+        </div>
+      </div>
+
+      <!-- Checkout Button -->
+      <button class="checkout-btn pulse-animation" onclick="proceedToCheckout()">
+        <i class="bi bi-lock-fill"></i>
+        PROCEED TO CHECKOUT
+      </button>
+
+      <!-- Security Badges -->
+      <div class="security-badges">
+        <div class="security-badge">
+          <i class="bi bi-shield-check text-success"></i>
+          <span>Secure Payment</span>
+        </div>
+        <div class="security-badge">
+          <i class="bi bi-arrow-left-right text-primary"></i>
+          <span>Easy Returns</span>
+        </div>
+        <div class="security-badge">
+          <i class="bi bi-truck text-warning"></i>
+          <span>Free Shipping*</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% include 'footer.html' %}
+
+<script>
+  // Cart functionality
+  function updateQuantity(itemId, change) {
+    const quantityInput = document.getElementById(`quantity-${itemId}`);
+    let currentQuantity = parseInt(quantityInput.value);
+    currentQuantity += change;
+    
+    if (currentQuantity < 1) currentQuantity = 1;
+    if (currentQuantity > 10) currentQuantity = 10;
+    
+    quantityInput.value = currentQuantity;
+    
+    // Add animation feedback
+    quantityInput.style.transform = 'scale(1.1)';
+    setTimeout(() => {
+      quantityInput.style.transform = 'scale(1)';
+    }, 150);
+    
+    updateCartTotal();
+  }
+
+  function removeItem(itemId) {
+    const item = document.querySelector(`[onclick="removeItem('${itemId}')"]`).closest('.cart-item');
+    
+    // Add removal animation
+    item.style.transform = 'translateX(-100%)';
+    item.style.opacity = '0';
+    
+    setTimeout(() => {
+      item.remove();
+      updateCartTotal();
+      showNotification('Item removed from cart');
+    }, 300);
+  }
+
+  function selectDelivery(option) {
+    // Remove selected class from all options
+    document.querySelectorAll('.delivery-option').forEach(opt => {
+      opt.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked option
+    event.currentTarget.classList.add('selected');
+    
+    updateCartTotal();
+  }
+
+  function updateCartTotal() {
+    // In a real application, this would calculate based on actual prices and quantities
+    console.log('Cart total updated');
+  }
+
+  function proceedToCheckout() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    // Add loading state
+    btn.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> PROCESSING...';
+    btn.disabled = true;
+    
+    // Simulate API call
+    setTimeout(() => {
+      showNotification('Redirecting to checkout...', 'success');
+      
+      // In real app, redirect to checkout page
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        // window.location.href = '/checkout/';
+      }, 2000);
+    }, 1500);
+  }
+
+  function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'info'} position-fixed`;
+    notification.style.cssText = `
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      min-width: 300px;
+      animation: slideInRight 0.3s ease;
+    `;
+    notification.innerHTML = `
+      <div class="d-flex align-items-center">
+        <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+        <span>${message}</span>
+      </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+      notification.style.animation = 'slideOutRight 0.3s ease';
+      setTimeout(() => {
+        notification.remove();
+      }, 300);
+    }, 3000);
+  }
+
+  // Initialize animations
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize AOS
+    if (typeof AOS !== 'undefined') {
+      AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+      });
+    }
+
+    // GSAP animations
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Animate cart items on scroll
+    gsap.utils.toArray('.cart-item').forEach((item, i) => {
+      gsap.fromTo(item, 
+        { x: -50, opacity: 0 },
+        { 
+          x: 0, 
+          opacity: 1, 
+          duration: 0.6,
+          delay: i * 0.1,
+          scrollTrigger: {
+            trigger: item,
+            start: "top 80%",
+            toggleActions: "play none none none"
+          }
+        }
+      );
+    });
+
+    // Floating animation for hero icon
+    const floatingIcon = document.querySelector('.floating');
+    if (floatingIcon) {
+      setInterval(() => {
+        floatingIcon.style.animation = 'none';
+        setTimeout(() => {
+          floatingIcon.style.animation = 'float 3s ease-in-out infinite';
+        }, 10);
+      }, 3000);
+    }
+  });
+
+  // Add custom animations
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    
+    .spinner {
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+
+<!-- AOS JS -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init();
+</script>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends 'header.html' %}
+{% load static %}
+
+{% block header %}
+<style>
+  h2 {
+    color: #dc3545;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    text-align: left;
+  }
+  th {
+    background-color: #f8d7da;
+  }
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  .status-resolved {
+    color: green;
+    font-weight: bold;
+  }
+  .status-pending {
+    color: red;
+    font-weight: bold;
+  }
+</style>
+
+
+  <h2 class="text-center mt-4">Complaints About You</h2>
+
+  {% if complaints %}
+  <div class="container-fluid">
+
+  <table >
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Product</th>
+        <th>House Type</th>
+        <th>Message</th>
+        <th>Created At</th>
+        <th>Status</th>
+        <th>Reply</th>
+        <th>Delete</th>  <!-- New column header -->
+      </tr>
+    </thead>
+    <tbody>
+      {% for complaint in complaints %}
+        <tr>
+          <td>{{ complaint.id }}</td>
+          <td>
+            {% if complaint.product %}
+              <a href="{% url 'detailview' complaint.product.pk %}">{{ complaint.product.title }}</a>
+            {% else %}
+              N/A
+            {% endif %}
+          </td>
+          <td>{{ complaint.get_house_type_display|default:"N/A" }}</td>
+          <td>{{ complaint.message|linebreaksbr }}</td>
+          <td>{{ complaint.created_at|date:"M d, Y H:i" }}</td>
+          <td>
+            {% if complaint.is_resolved %}
+              <span class="status-resolved">Resolved</span>
+            {% else %}
+              <span class="status-pending">Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if complaint.reply %}
+              {{ complaint.reply|linebreaksbr }}
+            {% else %}
+              <form method="post" style="min-width: 200px;">
+                {% csrf_token %}
+                <input type="hidden" name="complaint_id" value="{{ complaint.id }}">
+                <textarea name="reply" rows="2" class="form-control mb-2" placeholder="Write a reply..."></textarea>
+                <button type="submit" class="btn btn-sm btn-primary">Send</button>
+               
+              </form>
+            {% endif %}
+          </td>
+          <td>
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="delete_complaint_id" value="{{ complaint.id }}">
+              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this complaint?');">
+                Delete
+              </button>
+            </form>
+          </td>
+          
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+  
+  {% else %}
+    <p>No complaints found about you.</p>
+  {% endif %}
+{% endblock %}

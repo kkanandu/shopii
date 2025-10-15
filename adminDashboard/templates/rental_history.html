@@ -1,0 +1,39 @@
+{% extends 'header.html' %}
+{% load static %}
+{% load humanize %}
+{% block header %}
+
+<div class="container mt-4">
+  <h2 class="mb-4">Rental History - Paid Bookings</h2>
+  <table class="table table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>Booking ID</th>
+        <th>User</th>
+        <th>Property</th>
+        <th>Amount</th>
+        <th>Booking Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for booking in bookings %}
+      <tr>
+        <td>{{ booking.id }}</td>
+        <td>{{ booking.user.username }}</td>
+        <td>{{ booking.product.title }}</td>
+        <td>₹{{ booking.product.price }}</td>
+        <td>{{ booking.date_booked|naturaltime }}</td>
+        <td><span class="badge bg-success">Paid</span></td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="text-center">No paid bookings yet.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+
