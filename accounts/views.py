@@ -7,6 +7,7 @@ from .forms import RegisterForm, LoginForm, Socialreg
 from .models import *
 from django.urls import reverse_lazy, reverse
 from django.db import IntegrityError
+from django.conf import settings
 
 
 
@@ -75,10 +76,6 @@ def social_registration_view(request):
 #             return self.form_invalid(form)
 #     def get_success_url(self):
 #         return reverse('home')
-from django.contrib.auth import get_user_model
-from django.contrib.auth import login as auth_login
-from django.contrib.auth.backends import ModelBackend
-
 class LoginView(FormView):
     template_name = 'login.html'
     form_class = LoginForm
@@ -88,32 +85,14 @@ class LoginView(FormView):
         uname = form.cleaned_data.get('username')
         pswd = form.cleaned_data.get('password')
 
-        hardcoded_user = settings.HARDCODED_USER
-
-        if uname == hardcoded_user['username'] and pswd == hardcoded_user['password']:
-            User = get_user_model()
-            
-            try:
-                user = User.objects.get(username=uname)
-            except User.DoesNotExist:
-                # Create user if doesn't exist
-                user = User.objects.create_user(
-                    username=uname,
-                    password=hardcoded_user['password'],  # Store properly hashed
-                    email=hardcoded_user.get('email', ''),
-                    is_active=True
-                )
-            
-            # Manually set the backend attribute
-            user.backend = 'django.contrib.auth.backends.ModelBackend'
-            
-            # Now login will work
-            auth_login(self.request, user)
-            messages.success(self.request, "Login successful.")
+        # ✅ Use hardcoded login
+        if uname == 'testuser@gmail.com' and pswd == '12345678':
+            self.request.session['user'] = uname
+            messages.success(self.request, "Login successful!")
             return redirect('home')
-        else:
-            messages.error(self.request, "Invalid username or password.")
-            return self.form_invalid(form)
+        
+        messages.error(self.request, "Invalid username or password.")
+        return self.form_invalid(form)
 class LogoutView(View):
     def get(self, request):
         logout(request)
