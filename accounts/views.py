@@ -35,46 +35,85 @@ def register_view(request):
 def social_registration_view(request):
     user = request.user
     return redirect('home')
+# class LoginView(FormView):
+#     template_name = 'login.html'
+#     form_class = LoginForm
+#     success_url = reverse_lazy('home') 
+#     def form_valid(self, form):
+#         uname = form.cleaned_data.get('username')
+#         pswd = form.cleaned_data.get('password')
+#         from django.contrib.auth import get_user_model
+#         User = get_user_model()
+#         try:
+#             user_obj = User.objects.get(username=uname)
+#         except User.DoesNotExist:
+#             messages.error(self.request, "Invalid username or password.")
+#             return self.form_invalid(form)
+#         if not user_obj.is_active and getattr(user_obj, "deletion_reason", None):
+#             messages.error(
+#                 self.request,
+#                 f"Your account has been deleted. Reason: {user_obj.deletion_reason}"
+#             )
+#             return self.form_invalid(form)
+#         user = authenticate(self.request, username=uname, password=pswd)
+#         if user:
+#             if user.is_superuser:
+#                 messages.error(self.request, "Please login via the admin panel.")
+#                 return self.form_invalid(form)
+#             if hasattr(user, 'deletion_reason') and user.deletion_reason:
+#                 messages.error(
+#                     self.request,
+#                     f"🚫 Your account has been deleted. Reason: {user.deletion_reason}. "
+#                     "Please contact support at 📧 stayfinder@gmail.com"
+#                 )
+#                 return self.form_invalid(form)
+#             login(self.request, user)
+#             messages.success(self.request, "Login successful.")
+#             return redirect('home')
+#         else:
+#             messages.error(self.request, "Invalid username or password.")
+#             return self.form_invalid(form)
+#     def get_success_url(self):
+#         return reverse('home')
+from django.contrib.auth import get_user_model
+from django.contrib.auth import login as auth_login
+from django.contrib.auth.backends import ModelBackend
+
 class LoginView(FormView):
     template_name = 'login.html'
     form_class = LoginForm
-    success_url = reverse_lazy('home') 
+    success_url = reverse_lazy('home')
+
     def form_valid(self, form):
         uname = form.cleaned_data.get('username')
         pswd = form.cleaned_data.get('password')
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        try:
-            user_obj = User.objects.get(username=uname)
-        except User.DoesNotExist:
-            messages.error(self.request, "Invalid username or password.")
-            return self.form_invalid(form)
-        if not user_obj.is_active and getattr(user_obj, "deletion_reason", None):
-            messages.error(
-                self.request,
-                f"Your account has been deleted. Reason: {user_obj.deletion_reason}"
-            )
-            return self.form_invalid(form)
-        user = authenticate(self.request, username=uname, password=pswd)
-        if user:
-            if user.is_superuser:
-                messages.error(self.request, "Please login via the admin panel.")
-                return self.form_invalid(form)
-            if hasattr(user, 'deletion_reason') and user.deletion_reason:
-                messages.error(
-                    self.request,
-                    f"🚫 Your account has been deleted. Reason: {user.deletion_reason}. "
-                    "Please contact support at 📧 stayfinder@gmail.com"
+
+        hardcoded_user = settings.HARDCODED_USER
+
+        if uname == hardcoded_user['username'] and pswd == hardcoded_user['password']:
+            User = get_user_model()
+            
+            try:
+                user = User.objects.get(username=uname)
+            except User.DoesNotExist:
+                # Create user if doesn't exist
+                user = User.objects.create_user(
+                    username=uname,
+                    password=hardcoded_user['password'],  # Store properly hashed
+                    email=hardcoded_user.get('email', ''),
+                    is_active=True
                 )
-                return self.form_invalid(form)
-            login(self.request, user)
+            
+            # Manually set the backend attribute
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
+            
+            # Now login will work
+            auth_login(self.request, user)
             messages.success(self.request, "Login successful.")
             return redirect('home')
         else:
             messages.error(self.request, "Invalid username or password.")
             return self.form_invalid(form)
-    def get_success_url(self):
-        return reverse('home')
 class LogoutView(View):
     def get(self, request):
         logout(request)
